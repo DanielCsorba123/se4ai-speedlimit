@@ -54,6 +54,7 @@ air_quality:
   timeout_s: 5                     # D21
   cache_ttl_min: 15
   max_cache_age_h: 3               # D26
+  failure_backoff_s: 60            # after a failed fetch, wait before calling again (review I-3)
   poor_aqi_threshold: 60           # D14: poor = EU AQI > 60
   fallback_table: [[60, 80], [80, 70], [100, 60], [.inf, 50]]   # D15 (upper bound, limit)
 
@@ -63,7 +64,8 @@ llm:
   effort: low
   max_tokens: 4096
   timeout_s: 10                    # D21
-  max_retries: 1
+  max_retries: 0                   # one attempt: the 10 s timeout is the deadline (review I-3)
+  fallback_cache_min: 5            # a failed call is not retried on every rerun
   cache_ttl_min: 60
   max_calls_per_day: 200
   prompt_version: aq-v1

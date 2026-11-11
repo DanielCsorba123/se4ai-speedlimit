@@ -189,3 +189,29 @@ def test_in_range_spike_replaced_by_siblings(tiny_readings, sensors, cfg):
     sib = df[df.sensor.isin([8, 11]) & (df.day == 5) & (df.hour == 12)].value.mean()
     assert rep.count("C10") == 1
     assert v == pytest.approx(sib)
+
+
+# --- review I-5 (C07 / D30) -------------------------------------------------------------
+
+def _blank(raw, sensors_, day, hours):
+    hit = raw.index[raw.sensor.isin(sensors_) & (raw.day == day) & raw.hour.isin(hours)]
+    raw.loc[hit, "value"] = float("nan")
+    return raw
+
+
+def test_whole_type_missing_is_not_interpolated(tiny_readings, sensors, cfg):
+    """All three temperature sensors empty for two hours -> hour incomplete, excluded (D30)."""
+    raw = _blank(load_readings(tiny_readings), [15, 18, 19], 5, [10, 11])
+    df, rep = clean_readings(raw, sensors, cfg)
+    hourly = to_hourly(df)
+    assert not hourly.loc[(5, 10), "complete"] and not hourly.loc[(5, 11), "complete"]
+    assert hourly.loc[(5, 9), "complete"]
+
+
+def test_single_sensor_short_gap_interpolated_long_gap_not(tiny_readings, sensors, cfg):
+    raw = _blank(load_readings(tiny_readings), [4], 5, [8, 9])                       # 2 h humidity gap
+    raw = _blank(raw, [4], 6, list(range(5, 11)))                                     # 6 h humidity gap
+    df, _ = clean_readings(raw, sensors, cfg)
+    hourly = to_hourly(df)
+    assert hourly.loc[(5, 8), "complete"] and hourly.loc[(5, 9), "complete"]
+    assert not hourly.loc[(6, 7), "complete"]

@@ -140,16 +140,16 @@
 
 - **Speaker notes:** The system is a router. Simple rules like "is it dark" stay as plain code, because they are defined exactly in the specification. The neural network only decides how much to reduce at night or in black ice, and the language model only handles air quality, with a fixed table behind it if it fails.
 
-## Slide 9 — The network is only slightly better than a simple average, and the ≤ 1/h target is reachable in 38 % of reduction hours
+## Slide 9 — The network is only slightly better than a simple average, and the ≤ 1/h target is reachable in 33 % of reduction hours
 
-- **Key message:** On the unseen last week the network beats the simple average a little (most where it is used: dark/ice hours), reaches the REQ1 target in 38 % of those hours, and needed the guard every time.
+- **Key message:** On the unseen last week the network beats the simple average a little (most where it is used: dark/ice hours), reaches the REQ1 target in 33 % of those hours, and needed the guard every time.
 - **Content (test set = days 25–31, D12, model `20261111-0906`):**
   - Model error (MAE near-accidents/h): **0.876** vs baseline (mean per condition × limit) **0.895** on all 168 test hours; **0.790 vs 0.856** on the 82 dark/ice hours.
-  - Share of dark/ice test hours where a limit ≤ 70 km/h is predicted ≤ 1.0: **37.8 %**; "target not reachable": **62.2 %**.
+  - Share of dark/ice test hours where a limit ≤ 70 km/h is predicted ≤ 1.0: **32.9 %**; "target not reachable": **67.1 %** (after the final-review fix that keeps the extrapolated 80 km/h value out of the guard).
   - Recommended limits vs operators (82 h): system 70 ×64, 60 ×17, 50 ×1 · operators 70 ×19, 60 ×55, 50 ×8 (F14). The system reduces less than the operators did.
   - Monotonicity guard changed the raw curve in **100 %** of dark/ice test hours: unguarded, the network always rated faster as safer (+0.435/h more at 40 than at 80 km/h).
   - REQ2: live forecast works (Vienna EAQI 45 → no reduction); live LLM call not yet run (no API key on the build machine) — LLM path and all fallbacks covered by 15 unit tests.
-  - Tests: **134 passing** (incl. injected slide-17 faults and offline GUI tests).
+  - Tests: **172 passing** (incl. injected slide-17 faults and offline GUI tests).
 - **Figure:** `figures/F13_model_vs_baseline.png` (and F14 in the appendix).
 
   ![Model vs baseline](figures/F13_model_vs_baseline.png)

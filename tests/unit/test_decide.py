@@ -117,3 +117,29 @@ def test_missing_artefact_uses_baseline_table():
 def test_missing_artefact_and_baseline_raises():
     with pytest.raises(ValueError):
         req1_limit(_sit(), None, CFG, rule=DARK)
+
+
+# --- final review fixes --------------------------------------------------------------------
+
+def test_guard_ignores_excluded_80_cell():
+    """Review I-2: the extrapolated 80 km/h prediction must not pull 70..40 down (D33, D32)."""
+    r = req1_limit(_sit(), _art({40: 1.5, 50: 1.4, 60: 1.3, 70: 1.2, 80: 0.9}), CFG, rule=DARK)
+    assert (r.limit, r.target_reachable) == (70, False)
+    assert r.rates_guarded[70] == 1.2
+
+
+def test_missing_input_uses_baseline_not_crash():
+    """Review I-1 (D30): NaN light -> fail-safe decision from the baseline table, no exception."""
+    import math
+    table = {("dark", 40): 1.86, ("dark", 50): 1.45, ("dark", 60): 1.27, ("dark", 70): 1.13,
+             ("dark", "*"): 1.3, ("*", "*"): 1.3}
+    art = ModelArtefact(estimators=[_NanHater()], smearing_k=1.0, features=list(FEATURES), baseline_table=table)
+    r = req1_limit(_sit(lux=math.nan), art, CFG)
+    assert r.active and r.source == "baseline_table" and r.limit <= 70
+
+
+class _NanHater:
+    def predict(self, X):
+        if X.isna().any().any():
+            raise ValueError("Input X contains NaN")
+        return np.ones(len(X))

@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| Build | branch `build/mvp`, model `20261111-0906-d536036` (trained on V100, days 1–24) |
-| Test suite | `.venv/Scripts/python -m pytest -q` → **134 passed** (unit, integration, GUI via AppTest; network tests excluded) |
+| Build | branch `build/mvp`, model `20261111-1026-6de7f31` (retrained after the final review) (trained on V100, days 1–24) |
+| Test suite | `.venv/Scripts/python -m pytest -q` → **172 passed** (after the final-review fix pass) (unit, integration, GUI via AppTest; network tests excluded) |
 | GUI | `streamlit run src/speedlimit/app.py --theme.base light`, live Open-Meteo forecast on, no Anthropic credentials on this machine |
 | Screenshots | `analysis/capture_screenshots.py` (Playwright + installed Chrome) → `docs/evidence/screenshots/` |
 
@@ -30,9 +30,9 @@ Pass rule: every "Then" observed and no crash. 7 of 8 pass; AT-5 is partial for 
 |---|---|
 | MAE all test hours (n = 168) | 0.876 vs baseline 0.895 (skill +0.006) |
 | MAE dark/ice test hours (n = 82) | 0.790 vs baseline 0.856 (skill +0.081) |
-| Target ≤ 1.0/h reachable | 37.8 % of dark/ice test hours (62.2 % "not reachable") |
+| Target ≤ 1.0/h reachable | 32.9 % of dark/ice test hours (67.1 % "not reachable"); 37.8 % before the review fix |
 | Monotone guard changed the curve | 100 % of dark/ice test hours (raw curve always says "faster is safer") |
-| Raw vs guarded sensitivity (40 vs 80 km/h) | +0.435 → −0.183 near-accidents/h |
+| Raw vs guarded sensitivity | +0.435 (40 vs 80, raw) → −0.048 (40 vs 70, guarded) near-accidents/h |
 | REQ1 choices vs operators (82 h) | system 70 ×64, 60 ×17, 50 ×1 · operators 70 ×19, 60 ×55, 50 ×8 |
 | Retraining check year N+1 | no_retrain, 12 648 / 12 648 rows identical (`drift_report.md`) |
 | Live air quality (Open-Meteo, Vienna) | EAQI max 45 → REQ2 inactive (`req2_live_sample.json`) |

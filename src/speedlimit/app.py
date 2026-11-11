@@ -24,6 +24,7 @@ from speedlimit.config import load_config
 from speedlimit.decide import RuntimeContext, decide
 from speedlimit.domain import Decision, Situation
 from speedlimit.model import load
+from speedlimit.ui_helpers import lux_to_slider, slider_to_lux
 
 ROOT = Path(__file__).resolve().parents[2]
 OFFLINE = os.environ.get("SPEEDLIMIT_OFFLINE") == "1"
@@ -113,13 +114,13 @@ def _fill_from_sample():
     day, hour = st.session_state["_sample_index"][st.session_state["sample"]]
     row = h.loc[(day, hour)]
     for key, _, lo, hi, _, col in SLIDERS:
-        v = math.log10(row[col] + 1e-3) if key == "log_lux" else float(row[col])
+        v = lux_to_slider(row[col]) if key == "log_lux" else float(row[col])
         st.session_state[key] = float(min(max(v, lo), hi))
 
 
 def _situation_from_sliders(ts: datetime, current: int) -> Situation:
     ss = st.session_state
-    return Situation(timestamp=ts, lux=10 ** ss["log_lux"], water_um=ss["water"], temp_c=ss["temp"],
+    return Situation(timestamp=ts, lux=slider_to_lux(ss["log_lux"]), water_um=ss["water"], temp_c=ss["temp"],
                      humidity=ss["humidity"], noise_db=ss["noise"], wind_strength=ss["wind_strength"],
                      wind_dir_deg=ss["wind_dir"], traffic_cps=ss["traffic"], current_limit=current)
 
@@ -219,7 +220,7 @@ def main() -> None:
         for key, label, lo, hi, step, _ in SLIDERS:
             st.slider(label, lo, hi, step=step, key=key, disabled=(mode == "Replay"))
             if key == "log_lux":
-                st.caption(f"= {10 ** st.session_state['log_lux']:.3g} lux (dark below 0.5)")
+                st.caption(f"= {slider_to_lux(st.session_state['log_lux']):.4g} lux (dark below 0.5)")
         st.divider()
         st.markdown("**Air quality**")
         use_forecast = st.checkbox("Use Open-Meteo forecast", value=not OFFLINE, key="use_forecast",

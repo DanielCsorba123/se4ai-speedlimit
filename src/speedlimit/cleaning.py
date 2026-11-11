@@ -193,17 +193,29 @@ def clean_readings(df: pd.DataFrame, sensors: pd.DataFrame, cfg: CleaningConfig
     df.loc[fill, "value"] = sib_mean.reindex(df.index)[fill]
     df.loc[fill, "imputed"] = True
     filled = int(fill.sum())
+    # interpolation only for sensors WITHOUT siblings (data report C07); a type whose sensors are
+    # all missing leaves the hour incomplete (D30). Gaps are measured in hours, and only whole gaps
+    # of <= max_interp_gap_h are filled (never the first part of a longer gap).
     df = df.sort_values(["sensor", "day", "hour"])
-    still = sensor_rows & df.value.isna()
-    if still.any():
-        interp = df.groupby("sensor").value.transform(
-            lambda v: v.astype(float).interpolate(limit=cfg.max_interp_gap_h, limit_area="inside"))
-        newly = still & interp.notna()
-        df.loc[newly, "value"] = interp[newly]
-        df.loc[newly, "imputed"] = True
-        filled += int(newly.sum())
-    rep.add("C07", filled, "missing values filled (siblings first, then <= "
-                           f"{cfg.max_interp_gap_h} h interpolation)")
+    singles = [ids[0] for g, ids in SENSOR_GROUPS.items() if len(ids) == 1 and g != "wind_dir"]
+    for sid in singles:
+        rows = df[(df.sensor == sid)]
+        if not rows.value.isna().any():
+            continue
+        t = (rows.day.astype(int) * 24 + rows.hour.astype(int)).to_numpy()
+        s = pd.Series(rows.value.astype(float).to_numpy(), index=t)
+        full = s.reindex(range(t.min(), t.max() + 1))
+        gap_id = full.notna().cumsum()
+        gap_len = full.isna().groupby(gap_id).transform("sum")
+        interp = full.interpolate(limit_area="inside").where(full.isna() & (gap_len <= cfg.max_interp_gap_h))
+        new = interp.reindex(t).to_numpy()
+        take = rows.value.isna().to_numpy() & ~np.isnan(new)
+        idx = rows.index[take]
+        df.loc[idx, "value"] = new[take]
+        df.loc[idx, "imputed"] = True
+        filled += int(take.sum())
+    rep.add("C07", filled, "missing values filled (siblings first; single sensors: gaps of <= "
+                           f"{cfg.max_interp_gap_h} h interpolated)")
     rep.add("C07-open", int((sensor_rows & df.value.isna()).sum()), "values left missing; hour incomplete")
 
     df = df.sort_values(["day", "hour", "sensor"]).reset_index(drop=True)

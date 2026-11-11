@@ -17,6 +17,7 @@ from speedlimit.domain import AQSummary
 URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
 HOURLY = ["european_aqi", "pm2_5", "pm10", "nitrogen_dioxide", "ozone"]
 _CACHE: dict[tuple[float, float], tuple[datetime, "AQForecast"]] = {}
+_FAILED: dict[tuple[float, float], datetime] = {}
 
 
 @dataclass(frozen=True)
@@ -35,6 +36,7 @@ class AQForecast:
 
 def clear_cache() -> None:
     _CACHE.clear()
+    _FAILED.clear()
 
 
 def _num(v) -> float:
@@ -61,6 +63,10 @@ def fetch_forecast(lat: float, lon: float, cfg: AQConfig, session=None, now: dat
     cached = _CACHE.get(key)
     if cached and now - cached[0] <= timedelta(minutes=cfg.cache_ttl_min):
         return cached[1]
+    failed = _FAILED.get(key)
+    if failed and now - failed < timedelta(seconds=cfg.failure_backoff_s):
+        return replace(cached[1], from_cache=True) if cached and now - cached[0] <= timedelta(
+            hours=cfg.max_cache_age_h) else None
     http = session or requests
     try:
         resp = http.get(URL, params={"latitude": lat, "longitude": lon, "hourly": ",".join(HOURLY),
@@ -69,10 +75,12 @@ def fetch_forecast(lat: float, lon: float, cfg: AQConfig, session=None, now: dat
         resp.raise_for_status()
         fc = _parse(resp.json(), lat, lon, now)
     except (requests.RequestException, ValueError, KeyError, TypeError):
+        _FAILED[key] = now
         if cached and now - cached[0] <= timedelta(hours=cfg.max_cache_age_h):
             return replace(cached[1], from_cache=True)
         return None
     _CACHE[key] = (now, fc)
+    _FAILED.pop(key, None)
     return fc
 
 

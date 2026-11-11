@@ -75,6 +75,7 @@ class AQConfig:
     timeout_s: float
     cache_ttl_min: int
     max_cache_age_h: float
+    failure_backoff_s: float
     poor_aqi_threshold: float
     fallback_table: list[list[float]]
 
@@ -87,6 +88,7 @@ class LLMConfig:
     max_tokens: int
     timeout_s: float
     max_retries: int
+    fallback_cache_min: int
     cache_ttl_min: int
     max_calls_per_day: int
     prompt_version: str

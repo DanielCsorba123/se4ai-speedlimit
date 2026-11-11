@@ -16,9 +16,9 @@ import pandas as pd
 
 from speedlimit.cli_train import prepare_hourly
 from speedlimit.config import load_config
-from speedlimit.decide import select_limit
+from speedlimit.decide import guard_candidates, select_limit
 from speedlimit.features import build_features
-from speedlimit.model import load, monotone_guard, predict_rate, split_by_day
+from speedlimit.model import load, predict_rate, split_by_day
 
 ROOT = Path(__file__).resolve().parents[1]
 FIG, EV = ROOT / "docs" / "figures", ROOT / "docs" / "evidence"
@@ -44,8 +44,9 @@ def main() -> None:
         sweep.append(predict_rate(art, Xl))
     sweep = np.column_stack(sweep)
     raw = [dict(zip(limits, row)) for row in sweep]
-    guarded = [monotone_guard(r) for r in raw]
-    activated = float(np.mean([any(abs(g[l] - r[l]) > 1e-9 for l in limits) for r, g in zip(raw, guarded)]))
+    guarded = [guard_candidates(r, cfg) for r in raw]
+    activated = float(np.mean([any(abs(g[l] - r[l]) > 1e-9 for l in limits if l <= cfg.decide.req1_max_limit)
+                               for r, g in zip(raw, guarded)]))
     chosen = pd.Series([select_limit(g, cfg)[0] for g in guarded]).value_counts().reindex(limits, fill_value=0)
     operators = di.speed_limit.astype(int).value_counts().reindex(limits, fill_value=0)
 

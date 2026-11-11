@@ -105,3 +105,13 @@ def test_summarise_uses_horizon_from_current_hour():
 def test_is_poor_threshold():
     assert not aq.is_poor(60, CFG.air_quality)
     assert aq.is_poor(61, CFG.air_quality)
+
+
+def test_failed_fetch_is_not_retried_immediately():
+    """Review I-3: a hanging Open-Meteo must not cost a full timeout on every rerun."""
+    s = _Session(requests.Timeout("slow"), _Resp(_payload()))
+    assert aq.fetch_forecast(48.21, 16.37, CFG.air_quality, session=s, now=NOW) is None
+    assert aq.fetch_forecast(48.21, 16.37, CFG.air_quality, session=s, now=NOW + timedelta(seconds=30)) is None
+    assert len(s.calls) == 1
+    later = aq.fetch_forecast(48.21, 16.37, CFG.air_quality, session=s, now=NOW + timedelta(minutes=2))
+    assert later is not None and len(s.calls) == 2

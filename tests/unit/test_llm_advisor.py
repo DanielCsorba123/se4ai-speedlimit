@@ -64,7 +64,7 @@ def test_request_shape():
     assert req["output_config"]["effort"] == "low"
     assert "temperature" not in req and "thinking" not in req
     assert req["fallbacks"] == "default" and "server-side-fallback-2026-07-01" in req["betas"]
-    assert c.options[0] == {"timeout": 10, "max_retries": 1}            # D21
+    assert c.options[0] == {"timeout": 10, "max_retries": 0}            # D21, review I-3
     user = req["messages"][0]["content"]
     assert "European AQI: 95 / 85" in user and "lat 48.210" in user
 
@@ -143,3 +143,18 @@ def test_calls_are_logged_without_secrets(tmp_path, monkeypatch):
     line = json.loads(log.read_text().splitlines()[0])
     assert line["source"] == "llm" and line["model"] == CFG.llm.model
     assert "sk-ant" not in log.read_text()
+
+
+def test_failed_call_is_not_retried_on_every_rerun():
+    """Review I-3: after a timeout the table result is cached briefly, so reruns do not block again."""
+    c = _FakeClient(exc=TimeoutError("slow"))
+    a = la.advise(_summary(), CFG, client=c)
+    b = la.advise(_summary(), CFG, client=c)
+    assert a.source == b.source == "table"
+    assert len(c.requests) == 1
+
+
+def test_no_sdk_retries_so_timeout_is_the_deadline():
+    c = _ok()
+    la.advise(_summary(), CFG, client=c)
+    assert c.options[0]["max_retries"] == 0                 # one 10 s attempt (D21), not 2 x 10 s

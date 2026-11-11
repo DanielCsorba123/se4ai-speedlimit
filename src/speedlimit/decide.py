@@ -23,6 +23,19 @@ def _condition(rule: RuleResult) -> str:
     return "dark" if rule.dark else "black_ice"
 
 
+def guard_candidates(rates_raw: dict[int, float], cfg: Config) -> dict[int, float]:
+    """D9 over the REQ1 candidates only (<= req1_max_limit, D33).
+
+    Limits above the cap (80, never chosen and without dark/ice training data, D32) keep their raw
+    value for display and do not feed the running minimum - otherwise an extrapolated 80 km/h
+    prediction would pull 70..40 down and fake a reachable target.
+    """
+    cap = cfg.decide.req1_max_limit
+    guarded = monotone_guard({l: r for l, r in rates_raw.items() if l <= cap})
+    guarded |= {l: r for l, r in rates_raw.items() if l > cap}
+    return dict(sorted(guarded.items()))
+
+
 def select_limit(guarded: dict[int, float], cfg: Config) -> tuple[int, bool]:
     d = cfg.decide
     allowed = {l: r for l, r in guarded.items() if l <= d.req1_max_limit}            # D33
@@ -42,19 +55,22 @@ def req1_limit(s: Situation, art: ModelArtefact | None, cfg: Config, rule: RuleR
                           target_reachable=True, source="inactive")
 
     cond = _condition(rule)
-    if art is not None:
+    table = baseline if baseline is not None else (art.baseline_table if art is not None else None)
+    if art is not None and not rule.missing_inputs:
         raw = predict_rate(art, situation_to_frame(s, limits, cfg.features))
         source = "model"
         cells = art.cell_counts
-    elif baseline is not None:
-        raw = baseline_predict(baseline, [cond] * len(limits), limits)
+    elif table:
+        # no model, or an input is missing (D30): the network cannot run on NaN, the per-condition
+        # baseline still gives a fail-safe decision
+        raw = baseline_predict(table, [cond] * len(limits), limits)
         source = "baseline_table"
         cells = {}
     else:
         raise ValueError("REQ1 needs a model artefact or a baseline table")
 
     rates_raw = {l: float(r) for l, r in zip(limits, raw)}
-    guarded = monotone_guard(rates_raw)                                                # D9
+    guarded = guard_candidates(rates_raw, cfg)                                         # D9, D33
     limit, reachable = select_limit(guarded, cfg)
     extrapolated = tuple(l for l in limits if cells and cells.get((cond, l), 0) == 0)  # D32
     return Req1Result(active=True, limit=limit, rates_raw=rates_raw, rates_guarded=guarded,

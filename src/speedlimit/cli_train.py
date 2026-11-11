@@ -19,9 +19,9 @@ from speedlimit.cleaning import CleaningReport, clean_readings, join_accidents, 
 from speedlimit.config import Config, load_config
 from speedlimit.features import FEATURES, build_features
 from speedlimit.io_load import load_accidents, load_readings, load_sensors
-from speedlimit.decide import select_limit
-from speedlimit.model import (baseline_predict, baseline_table, evaluate, monotone_guard, predict_rate, save,
-                              split_by_day, train)
+from speedlimit.decide import guard_candidates, select_limit
+from speedlimit.model import (baseline_predict, baseline_table, evaluate, predict_rate, save, split_by_day,
+                              train)
 from speedlimit.rules import label_conditions
 
 CONDITIONS = ["dark", "black_ice", "normal"]
@@ -109,7 +109,7 @@ MAE {d['mae']:.3f} vs baseline {d['mae_baseline']:.3f}; Poisson deviance {d['poi
 - Share of dark/ice test hours where some limit reaches <= {cfg.decide.target_rate}/h: **{m['reachable_share_raw']:.1%}**.
 
 ### What REQ1 decides (after the D9 guard, candidates <= {cfg.decide.req1_max_limit} km/h per D33)
-- Mean guarded rate at 40 minus at 80 km/h: **{m['limit_sensitivity_guarded']:+.3f}** per hour.
+- Mean guarded rate at 40 minus at {cfg.decide.req1_max_limit} km/h: **{m['limit_sensitivity_guarded']:+.3f}** per hour.
 - Share of dark/ice test hours where the target <= {cfg.decide.target_rate}/h is reachable: **{m['reachable_share_guarded']:.1%}**.
 - Chosen REQ1 limit over the {d['n']} dark/ice test hours: {', '.join(f"{l} km/h: {n}" for l, n in m['req1_decisions'].items())}.
 
@@ -160,9 +160,10 @@ def main(argv: list[str] | None = None) -> int:
     metrics["limit_sensitivity_raw"] = float((sweep[:, 0] - sweep[:, -1]).mean())
     metrics["reachable_share_raw"] = float((sweep.min(axis=1) <= cfg.decide.target_rate).mean())
     limits = list(cfg.decide.candidate_limits)
-    guarded = [monotone_guard(dict(zip(limits, row))) for row in sweep]          # D9
+    guarded = [guard_candidates(dict(zip(limits, row)), cfg) for row in sweep]   # D9 over <= 70 (D33)
     choices = [select_limit(g, cfg) for g in guarded]                             # D7, D25, D33
-    metrics["limit_sensitivity_guarded"] = float(np.mean([g[limits[0]] - g[limits[-1]] for g in guarded]))
+    cap = cfg.decide.req1_max_limit
+    metrics["limit_sensitivity_guarded"] = float(np.mean([g[limits[0]] - g[cap] for g in guarded]))
     metrics["reachable_share_guarded"] = float(np.mean([ok for _, ok in choices]))
     metrics["req1_decisions"] = {str(l): int(n) for l, n in
                                  sorted(pd.Series([l for l, _ in choices]).value_counts().items())}

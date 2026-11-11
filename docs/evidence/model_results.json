@@ -1,5 +1,5 @@
 {
-  "model_version": "20261111-0906-d536036",
+  "model_version": "20261111-1026-6de7f31",
   "mae": 0.8757444250919959,
   "mae_baseline": 0.8948817286344826,
   "skill": 0.005610615484597958,
@@ -13,8 +13,8 @@
     "skill": 0.08067256504278086,
     "sum_ratio": 0.9183333828462816
   },
-  "reachable_share": 0.3780487804878049,
-  "not_reachable_share": 0.6219512195121951,
+  "reachable_share": 0.32926829268292684,
+  "not_reachable_share": 0.6707317073170731,
   "guard_activation_share": 1.0,
   "req1_choices": {
     "40": 0,
@@ -31,5 +31,5 @@
     "80": 0
   },
   "limit_sensitivity_raw": 0.43504895134671573,
-  "limit_sensitivity_guarded": -0.1833747948784762
+  "limit_sensitivity_guarded": -0.04774357513573224
 }

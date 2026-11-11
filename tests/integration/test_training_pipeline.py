@@ -39,7 +39,7 @@ def test_training_reports_guarded_req1_outcome(tmp_path):
     cli_train.main(["--config", str(ROOT / "config.yaml"),
                     "--models-dir", str(tmp_path / "models"), "--reports-dir", str(tmp_path / "reports")])
     metrics = json.loads((tmp_path / "reports" / "metrics.json").read_text())
-    assert metrics["limit_sensitivity_guarded"] <= 0                # guard: 40 never riskier than 80
+    assert metrics["limit_sensitivity_guarded"] <= 0                # guard: 40 never riskier than 70 (D9, D33)
     assert 0 <= metrics["reachable_share_guarded"] <= 1
     dist = metrics["req1_decisions"]                                 # chosen REQ1 limit over dark/ice test hours
     assert set(dist) <= {"40", "50", "60", "70"}                     # D33: never 80

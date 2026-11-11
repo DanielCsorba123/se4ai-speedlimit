@@ -151,3 +151,13 @@ def test_real_model_dark_hour(tmp_path):
     assert d.rule.dark and d.req1.source == "model"
     assert d.limit in (40, 50, 60, 70)
     assert d.req1.extrapolated == (80,)
+
+
+@pytest.mark.realdata
+def test_real_model_missing_input_is_fail_safe(tmp_path):
+    """Review I-1: a NaN input with the real artefact gives a REQ1 decision, not the D29 crash path."""
+    cli_train.main(["--config", str(ROOT / "config.yaml"), "--models-dir", str(tmp_path / "m"),
+                    "--reports-dir", str(tmp_path / "r")])
+    art = load(tmp_path / "m" / "latest.joblib")
+    d = decide(_sit(timestamp=datetime(2026, 1, 6, 20), lux=float("nan")), RuntimeContext(cfg=CFG, art=art))
+    assert d.rule.dark and d.req1.source == "baseline_table" and d.limit <= 70

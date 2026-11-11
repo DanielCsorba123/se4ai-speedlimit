@@ -147,8 +147,10 @@ def advise(summary: AQSummary | None, cfg: Config, client=None, log_path: Path |
     system, user = build_prompt(summary)
     key = hashlib.sha256(f"{cfg.llm.model}|{cfg.llm.prompt_version}|{user}".encode()).hexdigest()
     hit = _cache.get(key)
-    if hit and now - hit[0] <= timedelta(minutes=cfg.llm.cache_ttl_min):
-        return hit[1]
+    if hit:
+        ttl = cfg.llm.cache_ttl_min if hit[1].source == "llm" else cfg.llm.fallback_cache_min
+        if now - hit[0] <= timedelta(minutes=ttl):
+            return hit[1]
     day = now.strftime("%Y-%m-%d")
     if _calls.get(day, 0) >= cfg.llm.max_calls_per_day:
         return _table_result(summary, cfg, "daily LLM budget reached")
@@ -178,6 +180,5 @@ def advise(summary: AQSummary | None, cfg: Config, client=None, log_path: Path |
     entry |= {"latency_ms": round((time.perf_counter() - t0) * 1000), "source": result.source,
               "limit": result.limit}
     _log(log_path, entry)
-    if result.source == "llm":
-        _cache[key] = (now, result)
+    _cache[key] = (now, result)          # fallbacks too, briefly: a hung LLM must not block every rerun
     return result
