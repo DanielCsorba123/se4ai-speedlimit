@@ -1,0 +1,183 @@
+--- slide1.xml
+Case Study Speed Limit
+Martin Hasitschka
+1
+--- slide2.xml
+Martin Hasitschka
+2
+Project Description
+SE4AIB
+SE4AII
+--- slide3.xml
+Project Description
+Martin Hasitschka
+3
+
+SE4AIB
+SE4AII
+The highway operator company keeps records of the current speed limit, weather, lighting conditions and accident history (including near accidents). 
+Using machine learning, it wants to explore the relationship between those data. In production, the neural network shall only be used if it is dark or the weather is bad. Under those conditions it shall decide by what amount to reduce the speed limit. 
+Bad weather and darkness are not the only possible reasons to reduce the speed limit. Another reason is bad air quality. Here the company has no sufficient data for machine learning. So an LLM should decide based on the current air quality (queried via API) if and by how much the speed limit should be reduced.
+If it is not dark and both the weather and the air quality are good, the speed limit is not reduced at all. It remains at 80 km/h.
+--- slide4.xml
+Martin Hasitschka
+4
+Data Description
+SE4AIB
+SE4AII
+--- slide5.xml
+Data: Speed Limit
+Martin Hasitschka
+5
+
+SE4AIB
+SE4AII
+The highway is equipped with sensors. They are described in the files Sensors.csv and SensorTypes.csv (all filenames are extended by version numbers).
+--- slide6.xml
+Data: Speed Limit / 2
+Martin Hasitschka
+6
+
+SE4AIB
+SE4AII
+Each sensor creates sensor readings – typically one per hour. The file SensorReadings.csv (filename is extended by the year and a version number) contains all sensor readings of a given time interval.
+Note that the speed limit itself is coded as a special sensor reading with sensorID = -1 (e.g. the second line in the screenshot showing that the speed limit was 70 km/h on Jan 1st at 0:22 in the morning).
+--- slide7.xml
+Data: Speed Limit / 3
+Martin Hasitschka
+7
+
+SE4AIB
+SE4AII
+Moreover, there is a file accidents.csv (filename extended by year and version number), with accidents and near-accidents.
+Damage for accidents: The damage caused by the accident in Euros.
+Injured for accidents: The number of people injured in the accident.
+CloseCarCm for near-accidents: How close the car came to another car (in cm).
+CloseGuardailCm for near-accidents: How close the car came to the guardrail (in cm).
+SkidAngle for near-accidents: By how many degrees the car was 	thrown out of the straight line.
+--- slide8.xml
+Martin Hasitschka
+8
+System Requirements
+SE4AIB
+SE4AII
+--- slide9.xml
+System Requirements Speed Limit
+Martin Hasitschka
+9
+
+SE4AIB
+SE4AII
+REQ1: When it is dark or there is danger of black ice the speed limit on the highway shall be reduced in such a way 
+that there will be on average at most one near-accident per hour.
+REQ2: When poor air quality is predicted the speed limit on the highway shall be reduced in an appropriate way.
+REQ3: If there is no reason to reduce the speed limit because of REQ1 or REQ2, it is set to 80 km/h.
+--- slide10.xml
+Martin Hasitschka
+10
+Requirements Specification
+SE4AIB
+SE4AII
+--- slide11.xml
+First Steps of the Requirements Specification Speed Limit
+Martin Hasitschka
+11
+
+SE4AIB
+SE4AII
+SPEC1: It is dark when the illuminance is below 500 millilux.
+SPEC2: There is danger of black ice if there is more than 1000 micrometers water on the road and the temperature is below zero degrees Celsius. 
+SPEC3: A neural network shall learn from sensor data how 
+weather, 
+current speed limit and the 
+number of near-accidents 
+are connected. 
+SPEC4: A near-accident is defined as a car skidding or getting too close to another car or the highway guardrail.
+--- slide12.xml
+STOP UPLOAD HERE
+Martin Hasitschka
+12
+
+SE4AIB
+SE4AII
+--- slide13.xml
+Martin Hasitschka
+13
+Integration
+SE4AIB
+SE4AII
+--- slide14.xml
+RE Exercises
+Martin Hasitschka
+14
+
+Find stakeholders
+Complete system requirements
+Complete requirements specifications
+Add assumptions
+Add glossary
+Nonfunctional requirements
+Avoid typical natural language requirements errors
+--- slide15.xml
+System Requirements Speed Limit
+Martin Hasitschka
+15
+
+Arc Diag with ROUTER
+--- slide16.xml
+Data Preparation: Speed Limit
+Martin Hasitschka
+16
+Visualize the structure of the data using a class diagram.
+Analyze the data: What errors (inconsistencies, redundancies, missing values, wrong values, …) have you found? Specify how you will deal with those errors.
+How will you use the neural network? What attributes does the input have (feature engineering)? What is the attribute to be predicted by the network? Specify how you get the input from the raw data.
+SE4AIB
+SE4AII
+HMXHSS
+--- slide17.xml
+Data Preparation: Speed Limit
+Martin Hasitschka
+17
+Errors
+Sensor type T ambiguous: Traffic and Temperature
+Sensor 19 has readings, but no sensor description. Seems to be temperature sensor.
+Sensors 7, 10 and 17 have a sensor description, but no readings
+wind direction meaningful if windspeed = 0?
+Sensor 18: empty readings for the first five hours of the 26th of January.
+Sensor 15: empty sensor# for the last two hours of the 24th of January.
+Sensor 2: NULL-string for month for the first six hours of the 18th of January. Imputation no problem (should read 1).
+Sensor 13: 1.1. 12:00 to 14:00 Out of defined sensor range (more than 400 degrees wind direction).
+What is the difference between 360 degrees and 0 degrees?
+Sensor 15: one day completely missing (Jan 10th)
+Sensor 4: readings of Jan 12th duplicated
+Sensor 9: January instead of 1
+Sensor 11: 17.1. 9:00 extreme high out of band value
+Speed Limit 6.1. 20:00 for no understandable reason first dataset
+Challenges
+Only January
+Lux: Better take logarithm?
+LicencePlate: Privacy
+Feature Engineering: Damage, Injured, DistCar, DistGuardRail, BadAngle --&gt; Total Danger Index
+Feature Engineering: Minute and Second as Input? Noise as input? Wind? Wind direction?
+Feature Engineering: Average of several sensors if there are several?
+Is Traffic (cars per second) an input or output variable? Don't we want to reduce the speed to maximize cars per second (among other things)?
+SE4AIO
+SE4AII
+--- slide18.xml
+Development: Speed Limit
+Martin Hasitschka
+18
+
+Write code that 
+repairs the data errors following you specification and 
+transforms the data into a ready-to-use format for the neural network following your specification.
+SE4AIB
+SE4AII
+--- slide19.xml
+Retraining?: Speed Limit
+Martin Hasitschka
+19
+
+Analyze SensorReadings.csv for the year after the training yearand decide whether it is necessary to retrain the neural network.
+SE4AIB
+SE4AII

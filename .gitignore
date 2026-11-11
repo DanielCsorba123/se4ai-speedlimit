@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+models/
+logs/
+reports/
+site/
+.env
+.superpowers/
+analysis/scratch/

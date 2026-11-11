@@ -1,0 +1,138 @@
+{
+  "rows": {
+    "readings_N": 12648,
+    "readings_N1": 12648,
+    "accidents": 997,
+    "sensors_defined": 18,
+    "sensor_types_rows": 9
+  },
+  "sensors_no_readings": [
+    7,
+    10,
+    17
+  ],
+  "sensors_undocumented": [
+    19
+  ],
+  "hours": 744,
+  "hours_dark": 354,
+  "hours_ice_not_dark": 35,
+  "hours_ice_total": 62,
+  "hours_reduction_needed": 389,
+  "speed_limit_counts": {
+    "40": 7,
+    "50": 55,
+    "60": 258,
+    "70": 97,
+    "80": 327
+  },
+  "unexplained_reductions": 28,
+  "unexplained_examples": [
+    "Jan 1 09:00 -> 60 km/h",
+    "Jan 1 16:00 -> 60 km/h",
+    "Jan 7 13:00 -> 60 km/h",
+    "Jan 11 07:00 -> 60 km/h",
+    "Jan 12 11:00 -> 60 km/h",
+    "Jan 12 16:00 -> 60 km/h"
+  ],
+  "unexplained_hours_of_day": {
+    "6": 2,
+    "7": 3,
+    "8": 1,
+    "9": 3,
+    "10": 1,
+    "11": 2,
+    "12": 1,
+    "13": 3,
+    "14": 2,
+    "15": 1,
+    "16": 6,
+    "17": 2,
+    "18": 1
+  },
+  "near_per_hour_overall": 1.3,
+  "corr_near_vs_speed": 0.008,
+  "corr_near_vs_traffic16": 0.011,
+  "near_by_cond_speed": [
+    {
+      "cond": "black ice",
+      "speed": 50,
+      "mean_near_per_h": 1.25,
+      "hours": 4
+    },
+    {
+      "cond": "black ice",
+      "speed": 60,
+      "mean_near_per_h": 1.21,
+      "hours": 19
+    },
+    {
+      "cond": "black ice",
+      "speed": 70,
+      "mean_near_per_h": 1.17,
+      "hours": 12
+    },
+    {
+      "cond": "dark",
+      "speed": 40,
+      "mean_near_per_h": 1.86,
+      "hours": 7
+    },
+    {
+      "cond": "dark",
+      "speed": 50,
+      "mean_near_per_h": 1.45,
+      "hours": 51
+    },
+    {
+      "cond": "dark",
+      "speed": 60,
+      "mean_near_per_h": 1.27,
+      "hours": 211
+    },
+    {
+      "cond": "dark",
+      "speed": 70,
+      "mean_near_per_h": 1.13,
+      "hours": 85
+    },
+    {
+      "cond": "normal",
+      "speed": 60,
+      "mean_near_per_h": 1.04,
+      "hours": 28
+    },
+    {
+      "cond": "normal",
+      "speed": 80,
+      "mean_near_per_h": 1.35,
+      "hours": 327
+    }
+  ],
+  "acc_hour_min_max": [
+    1,
+    24
+  ],
+  "acc_hour24_count": 44,
+  "corr_16_vs_15": 0.21,
+  "corr_15_18_19_min": 0.996,
+  "acc_fields_per_row": {
+    "1": 986,
+    "2": 10,
+    "0": 1
+  },
+  "acc_composition": {
+    "CloseCarCm": 886,
+    "CloseGuardrailCm": 63,
+    "SkidAngle": 15,
+    "Damage (accident)": 32,
+    "Injured (accident)": 10
+  },
+  "near_accidents": 964,
+  "accidents": 32,
+  "acc_empty_rows": 1,
+  "closecar_max_cm": 20.0,
+  "n1_identical_rows": 12648,
+  "every_sensor_744": true,
+  "wd_max": 257.0
+}
