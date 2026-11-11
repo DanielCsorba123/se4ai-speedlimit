@@ -43,6 +43,7 @@ decide:
   candidate_limits: [40, 50, 60, 70, 80]   # D7
   target_rate: 1.0                         # REQ1
   unreachable_epsilon: 0.05                # D25
+  req1_max_limit: 70                       # D33: REQ1 must reduce
   default_limit: 80                        # REQ3
   crash_display_limit: 60                  # D29
 

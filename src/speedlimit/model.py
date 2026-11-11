@@ -11,6 +11,7 @@ import platform
 import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
+from collections.abc import Mapping
 from typing import Any
 
 import joblib
@@ -148,3 +149,20 @@ def evaluate(pred: np.ndarray, y: np.ndarray, base: np.ndarray) -> dict[str, Any
         "sum_ratio": float(pred.sum() / y.sum()) if y.sum() else float("nan"),
         "calibration": calib,
     }
+
+
+# --- monotone guard (D9) ------------------------------------------------------------
+
+def monotone_guard(rates: Mapping[int, float]) -> dict[int, float]:
+    """Make predicted rates non-increasing as the limit goes down.
+
+    Walks the limits from highest to lowest keeping the running minimum, so a
+    lower limit is never rated riskier than a higher one (blocks the confounded
+    "faster is safer" curve, F04).
+    """
+    out: dict[int, float] = {}
+    running = float("inf")
+    for lim in sorted(rates, reverse=True):
+        running = min(running, float(rates[lim]))
+        out[lim] = running
+    return dict(sorted(out.items()))

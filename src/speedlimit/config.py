@@ -62,6 +62,7 @@ class DecideConfig:
     candidate_limits: list[int]
     target_rate: float
     unreachable_epsilon: float
+    req1_max_limit: int
     default_limit: int
     crash_display_limit: int
 

@@ -19,8 +19,9 @@ from speedlimit.cleaning import CleaningReport, clean_readings, join_accidents, 
 from speedlimit.config import Config, load_config
 from speedlimit.features import FEATURES, build_features
 from speedlimit.io_load import load_accidents, load_readings, load_sensors
-from speedlimit.model import (baseline_predict, baseline_table, evaluate, predict_rate, save, split_by_day,
-                              train)
+from speedlimit.decide import select_limit
+from speedlimit.model import (baseline_predict, baseline_table, evaluate, monotone_guard, predict_rate, save,
+                              split_by_day, train)
 from speedlimit.rules import label_conditions
 
 CONDITIONS = ["dark", "black_ice", "normal"]
@@ -107,6 +108,11 @@ MAE {d['mae']:.3f} vs baseline {d['mae_baseline']:.3f}; Poisson deviance {d['poi
 - Mean predicted rate at 40 minus at 80 km/h over dark/ice test hours: **{m['limit_sensitivity_raw']:+.3f}** per hour.
 - Share of dark/ice test hours where some limit reaches <= {cfg.decide.target_rate}/h: **{m['reachable_share_raw']:.1%}**.
 
+### What REQ1 decides (after the D9 guard, candidates <= {cfg.decide.req1_max_limit} km/h per D33)
+- Mean guarded rate at 40 minus at 80 km/h: **{m['limit_sensitivity_guarded']:+.3f}** per hour.
+- Share of dark/ice test hours where the target <= {cfg.decide.target_rate}/h is reachable: **{m['reachable_share_guarded']:.1%}**.
+- Chosen REQ1 limit over the {d['n']} dark/ice test hours: {', '.join(f"{l} km/h: {n}" for l, n in m['req1_decisions'].items())}.
+
 ## Training cells (hours per condition x limit, D32)
 | Condition | {' | '.join(str(l) for l in cfg.decide.candidate_limits)} |
 |---|{'---|' * len(cfg.decide.candidate_limits)}
@@ -153,6 +159,13 @@ def main(argv: list[str] | None = None) -> int:
     sweep = _sweep(art, test_h[di], cfg)
     metrics["limit_sensitivity_raw"] = float((sweep[:, 0] - sweep[:, -1]).mean())
     metrics["reachable_share_raw"] = float((sweep.min(axis=1) <= cfg.decide.target_rate).mean())
+    limits = list(cfg.decide.candidate_limits)
+    guarded = [monotone_guard(dict(zip(limits, row))) for row in sweep]          # D9
+    choices = [select_limit(g, cfg) for g in guarded]                             # D7, D25, D33
+    metrics["limit_sensitivity_guarded"] = float(np.mean([g[limits[0]] - g[limits[-1]] for g in guarded]))
+    metrics["reachable_share_guarded"] = float(np.mean([ok for _, ok in choices]))
+    metrics["req1_decisions"] = {str(l): int(n) for l, n in
+                                 sorted(pd.Series([l for l, _ in choices]).value_counts().items())}
 
     art = dataclasses.replace(
         art, version=_version(), candidate_limits=list(cfg.decide.candidate_limits), baseline_table=table,
@@ -161,13 +174,16 @@ def main(argv: list[str] | None = None) -> int:
 
     save(art, models_dir / f"model_{art.version}.joblib")
     save(art, models_dir / "latest.joblib")
+    (models_dir / "baseline_table.json").write_text(
+        json.dumps({f"{c}|{l}": v for (c, l), v in table.items()}, indent=2), encoding="utf-8")
     (models_dir / f"model_card_{art.version}.md").write_text(_card(art, metrics, cfg, report), encoding="utf-8")
     reports_dir.mkdir(parents=True, exist_ok=True)
     (reports_dir / "metrics.json").write_text(json.dumps(metrics, indent=2), encoding="utf-8")
     (reports_dir / "cleaning_report.json").write_text(
         json.dumps({"events": report.events, "silent_sensors": report.silent_sensors}, indent=2), encoding="utf-8")
     print(f"model {art.version}: test MAE {metrics['mae']:.3f} (baseline {metrics['mae_baseline']:.3f}), "
-          f"skill {metrics['skill']:+.3f}, reachable {metrics['reachable_share_raw']:.0%}")
+          f"skill {metrics['skill']:+.3f}, REQ1 reachable {metrics['reachable_share_guarded']:.0%}, "
+          f"decisions {metrics['req1_decisions']}")
     return 0
 
 
