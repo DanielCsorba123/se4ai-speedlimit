@@ -4,7 +4,7 @@
     {
       "name": "speedlimit-gui",
       "runtimeExecutable": ".venv/Scripts/streamlit.exe",
-      "runtimeArgs": ["run", "src/speedlimit/app.py", "--server.port", "8501", "--server.headless", "true", "--browser.gatherUsageStats", "false"],
+      "runtimeArgs": ["run", "src/speedlimit/app.py", "--server.port", "8501", "--server.headless", "true", "--browser.gatherUsageStats", "false", "--theme.base", "light"],
       "port": 8501
     }
   ]

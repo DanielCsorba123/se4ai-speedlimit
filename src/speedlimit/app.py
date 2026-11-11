@@ -40,6 +40,29 @@ SLIDERS = [
 ]
 
 
+# Demo deep links ?scenario=AT-n (test strategy §4). (day, hour) picks the sample hour; the rest overrides inputs.
+SCENARIOS = {
+    "AT-1": {"at": (25, 13), "log_lux": math.log10(25000), "water": 200.0, "temp": 4.0, "manual_aqi": 25.0},
+    "AT-2": {"at": (25, 22), "log_lux": -1.0, "water": 200.0, "temp": 4.0, "manual_aqi": 25.0},
+    "AT-3": {"at": (25, 11), "log_lux": math.log10(30000), "water": 1500.0, "temp": -2.0, "manual_aqi": 25.0},
+    "AT-4a": {"at": (25, 11), "log_lux": math.log10(30000), "water": 1000.0, "temp": -2.0, "manual_aqi": 25.0},
+    "AT-4b": {"at": (25, 11), "log_lux": math.log10(30000), "water": 1001.0, "temp": -2.0, "manual_aqi": 25.0},
+    "AT-5": {"at": (25, 13), "log_lux": math.log10(25000), "water": 200.0, "temp": 4.0, "manual_aqi": 92.0},
+    "AT-6": {"at": (25, 3), "log_lux": -2.0, "water": 3000.0, "temp": -8.0, "manual_aqi": 25.0},
+    "AT-8": {"at": (25, 22), "log_lux": -1.0, "water": 200.0, "temp": 4.0, "manual_aqi": 105.0},
+}
+
+
+def _apply_scenario(name: str, index: dict) -> None:
+    sc = SCENARIOS[name]
+    st.session_state["sample"] = next(l for l, dh in index.items() if dh == sc["at"])
+    _fill_from_sample()
+    for k, v in sc.items():
+        if k != "at":
+            st.session_state[k] = float(v)
+    st.session_state["_scenario"] = name
+
+
 @st.cache_resource
 def _config():
     cfg = load_config(ROOT / "config.yaml")
@@ -181,6 +204,9 @@ def main() -> None:
     index = {_label(d, h, r): (d, h) for (d, h), r in hourly.iterrows()}
     st.session_state["_sample_index"] = index
     labels = list(index)
+    scenario = st.query_params.get("scenario")
+    if scenario in SCENARIOS and st.session_state.get("_scenario") != scenario:
+        _apply_scenario(scenario, index)
     if "sample" not in st.session_state:
         test_start = cfg.split.test_days[0]
         st.session_state["sample"] = next(

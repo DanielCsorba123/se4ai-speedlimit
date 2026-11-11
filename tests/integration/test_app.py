@@ -118,3 +118,34 @@ def test_decisions_are_logged_once_per_input(env):
     rows = (env / "logs" / "decisions.jsonl").read_text().splitlines()
     assert len(rows) == 2
     assert not any("plate" in k.lower() for k in json.loads(rows[-1]))
+
+
+def _scenario(name):
+    at = AppTest.from_file(APP, default_timeout=60)
+    at.query_params["scenario"] = name
+    at.run()
+    return at
+
+
+def test_scenario_at1_normal_day(env):
+    at = _scenario("AT-1")
+    assert not at.exception
+    assert at.metric[0].value == "80 km/h" and "REQ3" in _texts(at)
+    assert at.selectbox(key="sample").value.startswith("Jan 25 13:00")
+
+
+def test_scenario_at4_threshold_pair(env):
+    assert _scenario("AT-4a").metric[0].value == "80 km/h"          # water exactly 1000: no ice
+    b = _scenario("AT-4b")
+    assert int(b.metric[0].value.split()[0]) <= 70 and "black-ice" in _texts(b)
+
+
+def test_scenario_at8_most_restrictive_wins(env):
+    at = _scenario("AT-8")
+    assert int(at.metric[0].value.split()[0]) <= 50
+    assert "REQ2" in _texts(at)
+
+
+def test_unknown_scenario_is_ignored(env):
+    at = _scenario("nope")
+    assert not at.exception and at.metric[0].value.endswith("km/h")
