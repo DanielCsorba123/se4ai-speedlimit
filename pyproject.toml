@@ -20,7 +20,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "matplotlib>=3.9", "playwright>=1.48"]
+dev = ["pytest>=8", "matplotlib>=3.9", "playwright>=1.48", "python-pptx>=1.0"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

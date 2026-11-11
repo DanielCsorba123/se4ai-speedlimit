@@ -27,7 +27,7 @@
 | Requirements and data findings | 4–6 | 4.0 |
 | Solution and results | 7–9 | 3.0 |
 | Live demo | 10 | 2.5 |
-| Retraining, risks, lessons, asks | 11–16 | 3.5 |
+| Retraining, risks, lessons, scope | 13–16 | 3.5 |
 | **Total** | | **15.0** |
 
 ---
@@ -192,11 +192,11 @@
 - **Key message:** Each risk has a mitigation in the MVP, but two of them need management action before production.
 - **Content:**
 
-  | Risk | Impact | Mitigation in MVP | Needs management? |
+  | Risk | Impact | Mitigation in MVP | Beyond the MVP |
   |---|---|---|---|
-  | One month of data (January only) | Model unknown for other seasons | Scope limited to winter; drift check | Yes: collect more data |
-  | Confounding (limit set because of conditions) | Model cannot learn the real effect of the limit | Monotonicity guard, transparency flag | Yes: controlled trial |
-  | REQ1 target not reachable | System cannot promise ≤ 1/h | "Target not reachable" flag | Yes: revisit target |
+  | One month of data (January only) | Model unknown for other seasons | Scope limited to winter; drift check | Would be needed: a full year |
+  | Confounding (limit set because of conditions) | Model cannot learn the real effect of the limit | Monotonicity guard, transparency flag | Optimal: controlled trial |
+  | REQ1 target not reachable | System cannot promise ≤ 1/h | "Target not reachable" flag | Decided (D35): as low as achievable |
   | LLM wrong / unavailable / cost | Wrong or missing REQ2 limit | Fixed JSON output, fallback table, source label | No |
   | Ambiguous sensor metadata (code T, sensor 19) | Wrong input mapping | Behaviour-based mapping (D2), documented | Fix master data |
   | 28 unexplained manual reductions | Noise in training data | Kept, flagged, never output (D10) | Ask operators why |
@@ -226,17 +226,6 @@
   - Status of each exercise: RE ✔, architecture ✔, data preparation ✔, cleaning code ✔ (rules C04–C16, tested on injected faults), retraining analysis ✔, implementation ✔ (training stage, GUI, REQ2; live LLM sample pending an API key).
 - **Figure:** none (two-column list).
 - **Speaker notes:** To be precise about what you are getting: a prototype that works end to end on historical data. It is not connected to real sensors, and it has only seen one winter month.
-
-## Slide 15 — We ask management for three decisions
-
-- **Key message:** Three concrete decisions unlock the next phase.
-- **Content:**
-  1. **Revisit the REQ1 target.** Either accept "as low as achievable, with a flag" or define a reachable target (e.g. a relative reduction) together with traffic safety experts.
-  2. **Fund data collection** for at least a full year, including summer and autumn, before any production decision.
-  3. **Approve a controlled trial** on one highway section (alternating limits under the same conditions) to measure the real effect of the speed limit, removing the confounding.
-  - Also: ask operators to document the reason for each manual reduction (would explain the 28 cases).
-- **Figure:** none.
-- **Speaker notes:** We need three decisions from you. First, whether the one-per-hour target stays as it is. Second, whether we can collect a full year of data. Third, whether we may run a small controlled trial, because that is the only reliable way to find out how much the speed limit really changes safety.
 
 ## Slide 16 — Next steps for the 3rd semester
 
@@ -287,7 +276,7 @@ Because the target is a property of the road, not of the model. The data shows n
 No. The limit was lowered by operators *because* conditions were bad, so bad conditions drive both. The data cannot separate the two effects. That is why we added the monotonicity guard and why we ask for a controlled trial.
 
 **3. One month of data. How can you trust any of this?**
-We trust it for what it is: a January prototype. We do not claim validity for other seasons, and the drift check will flag when new data differs. A full year of data is one of our three asks.
+We trust it for what it is: a January prototype. We do not claim validity for other seasons, and the drift check will flag when new data differs. A full year of data would be needed before production (D35).
 
 **4. Why use a neural network at all if correlation is 0.008?**
 The brief requires a neural network for the training stage. We kept it small (744 rows) and compare it against a simple average baseline on unseen days, so you can see whether it adds anything. Result: slightly better on unseen days (MAE 0.876 vs 0.895; 0.790 vs 0.856 in dark/ice hours). The architecture lets us swap it for a simpler model without touching the rest.

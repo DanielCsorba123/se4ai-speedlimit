@@ -226,11 +226,11 @@ Status tags:
 - **Why it matters:** A failed demo costs more credibility than no demo. Showing the fallback on purpose turns a risk into a feature.
 - **Next time:** Rehearse the demo offline once; include one deliberate failure scenario.
 
-### L6.4 End with decisions, not a summary `[observed now]`
+### L6.4 Decide inside the team wherever possible `[observed now]`
 
-- **What happened:** The last content slide asks management for three decisions: revisit the REQ1 target, fund a full year of data, approve a controlled trial.
-- **Why it matters:** A management audience needs to know what is expected of them.
-- **Next time:** Write the "decision ask" slide first and work backwards.
+- **What happened:** A first draft ended with three requests to management. We replaced them with our own decisions (D35, D36): the team keeps REQ1 as "as low as achievable" with the honest flag, and names a full year of data and a controlled trial as next steps beyond the MVP.
+- **Why it matters:** Open asks shift work back to the audience; a decided position with its reasons is easier to defend and to change later.
+- **Next time:** Turn every open question into a dated decision before the deck is drafted; only escalate what the team truly cannot decide (budget, data access).
 
 ---
 
