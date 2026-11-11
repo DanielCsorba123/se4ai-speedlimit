@@ -9,3 +9,4 @@ site/
 .env
 .superpowers/
 analysis/scratch/
+*.egg-info/

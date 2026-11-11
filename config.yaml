@@ -1,0 +1,71 @@
+# SpeedLimit MVP configuration. Keys follow docs/04-solution-architecture.md §11.2.
+# Secrets never go here: the Anthropic key is read from the ANTHROPIC_API_KEY env var.
+
+paths:
+  raw_dir: "."                     # course CSVs live in the repo root
+  readings_file: Case_Study_Speed_Limit_SensorReadingsYearN_V100.csv
+  readings_n1_file: Case_Study_Speed_Limit_SensorReadingsYearNPlus1_V100.csv
+  accidents_file: Case_Study_Speed_Limit_AccidentsYearN_V100.csv
+  sensors_file: Case_Study_Speed_Limit_Sensors_V100.csv
+  sensor_types_file: Case_Study_Speed_Limit_SensorTypes_V100.csv
+  models_dir: models
+  logs_dir: logs
+  reports_dir: reports
+
+rules:                             # SPEC1 / SPEC2, D5 (strict inequalities)
+  dark_lux_threshold: 0.5          # 500 millilux
+  ice_water_um_threshold: 1000
+  ice_temp_c_threshold: 0.0
+
+features:
+  lux_epsilon: 0.001               # log10(lux + eps), D11
+
+split:                             # D12, inclusive day ranges
+  train_days: [1, 24]
+  test_days: [25, 31]
+
+model:                             # architecture §5.2
+  hidden_layer_sizes: [16, 8]
+  alpha: 0.01
+  learning_rate_init: 0.001
+  max_iter: 2000
+  seeds: [0, 1, 2, 3, 4]
+  target_transform: log1p
+  artefact: models/latest.joblib
+
+decide:
+  candidate_limits: [40, 50, 60, 70, 80]   # D7
+  target_rate: 1.0                         # REQ1
+  unreachable_epsilon: 0.05                # D25
+  default_limit: 80                        # REQ3
+  crash_display_limit: 60                  # D29
+
+air_quality:
+  latitude: 48.21                  # D23 (stand-in location)
+  longitude: 16.37
+  horizon_hours: 3
+  timeout_s: 5                     # D21
+  cache_ttl_min: 15
+  max_cache_age_h: 3               # D26
+  poor_aqi_threshold: 60           # D14: poor = EU AQI > 60
+  fallback_table: [[60, 80], [80, 70], [100, 60], [.inf, 50]]   # D15 (upper bound, limit)
+
+llm:
+  enabled: true                    # false = always use the table (offline demo)
+  model: claude-sonnet-5-5
+  effort: low
+  max_tokens: 1024
+  timeout_s: 10                    # D21
+  max_retries: 1
+  cache_ttl_min: 60
+  max_calls_per_day: 200
+  prompt_version: aq-v1
+  plausibility_margin_kmh: 10      # D26
+
+gui:
+  replay_interval_min: 1           # wall-clock minutes per replay tick; each tick advances one data hour (D17, D21)
+  audit_rows: 50
+
+drift:                             # D13, D21
+  alpha: 0.05
+  mean_shift_rel: 0.10
