@@ -17,6 +17,9 @@ SITE = ROOT / "site"
 for f in (DOCS / "figures").glob("*.png"):
     shutil.copy(f, SITE / "figures" / f.name)
 shutil.copy(DOCS / "_sources" / "main-exercise-slide32.png", SITE / "figures" / "main-exercise-slide32.png")
+(SITE / "evidence" / "screenshots").mkdir(parents=True, exist_ok=True)
+for f in (DOCS / "evidence" / "screenshots").glob("*.png"):
+    shutil.copy(f, SITE / "evidence" / "screenshots" / f.name)
 
 facts = json.loads((DOCS / "figures" / "facts.json").read_text())
 
@@ -32,6 +35,9 @@ PAGES = [
     ("backlog", "superpowers/plans/2026-11-10-speedlimit-mvp.md", "Task Backlog", "Project Lead"),
     ("storyline", "08-presentation-storyline.md", "Presentation Storyline", "Project Lead"),
     ("lessons", "09-lessons-learned.md", "Lessons Learned", "Project Lead"),
+    ("uml", "10-uml.md", "UML Diagrams", "Architecture"),
+    ("acceptance", "evidence/acceptance_run.md", "Acceptance Run", "QA"),
+    ("drift", "evidence/drift_report.md", "Drift Report", "ML / QA"),
 ]
 
 CAPTIONS = {
@@ -46,6 +52,8 @@ CAPTIONS = {
     "F09": "Composition of the event log. 964 near-accidents against 32 accidents. Almost 9 out of 10 near-misses are 'too close to another car'.",
     "F10": "The year N+1 readings file is the year N file without its header: all 12,648 rows are identical. A drift check will find nothing, so the verdict is no retraining.",
     "F11": "First week of January. Light, water and temperature with their SPEC thresholds, against the speed limit actually set (black) and near-accidents per hour (red).",
+    "F13": "Model vs baseline on the unseen test week. The network is only slightly better than the mean per condition and limit, a bit more in the dark and icy hours where it is used.",
+    "F14": "What REQ1 chooses versus what operators chose in the 82 dark/icy test hours: mostly 70 instead of 60 km/h, never 80 (D33).",
     "F12": "The course's error list (deck slide 17) checked against the V100 files. Four structural issues are present. The eight row-level faults are not, so the pipeline handles them via injected-fault tests (D19).",
 }
 FIG_TITLES = {
@@ -53,6 +61,7 @@ FIG_TITLES = {
     "F04": "REQ1 vs data", "F05": "Clock mismatch", "F06": "Code T ambiguity",
     "F07": "Unexplained reductions", "F08": "Log-scale light", "F09": "Event composition",
     "F10": "Year N+1 = Year N", "F11": "Week overview", "F12": "Slide-17 error check",
+    "F13": "Model vs baseline", "F14": "REQ1 vs operators",
 }
 figs = sorted(p.name for p in (DOCS / "figures").glob("F*.png"))
 
@@ -135,7 +144,7 @@ overview = f'''<section class="view" data-view="overview">
     <div class="sign" aria-hidden="true"><span>80</span></div>
     <div><p class="eyebrow">SE4AI · Case study SpeedLimit · ExID SpeedLimit21</p>
     <h1>SpeedLimit Project Dossier</h1>
-    <p class="lede">Everything we know before writing code: the brief, the requirements, what the data really says, the design, the risks, the plan and the story for management. Status: <strong>recon complete, build not started</strong> (2026-11-10).</p></div>
+    <p class="lede">Everything we know before writing code: the brief, the requirements, what the data really says, the design, the risks, the plan and the story for management. Status: <strong>MVP built and reviewed</strong> (2026-11-11): 172 tests passing, 7 of 8 demo scenarios pass, management deck ready.</p></div>
   </header>
   <div class="tiles">{tiles_html}</div>
   <h2 class="sec">Key findings</h2>
@@ -163,7 +172,7 @@ gallery = "".join(f'''<figure class="gcard" id="g-{n[:3]}"><button type="button"
 <figcaption><span class="fid">{n[:3]}</span> <b>{FIG_TITLES.get(n[:3], "")}</b><span>{CAPTIONS.get(n[:3], "")}</span><code>docs/figures/{n}</code></figcaption></figure>''' for n in figs)
 evidence = f'''<section class="view" data-view="evidence" hidden>
   <p class="eyebrow">Presentation evidence</p><h1>Evidence Gallery</h1>
-  <p class="lede">Twelve screenshots of the data, rendered at 150 dpi for slides. Regenerate any time with <code>python analysis/make_figures.py</code>. Numbers come from <code>docs/figures/facts.json</code>.</p>
+  <p class="lede">Fourteen data figures and the UML diagrams, rendered at 150 dpi for slides. Regenerate any time with <code>python analysis/make_figures.py</code>. Numbers come from <code>docs/figures/facts.json</code>.</p>
   <div class="gallery">{gallery}</div>
 </section>'''
 

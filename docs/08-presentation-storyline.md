@@ -5,7 +5,7 @@
 | Project | SpeedLimit MVP (SE4AI, ExID SpeedLimit21) |
 | Document | Slide-by-slide outline for the final management presentation |
 | Owner | Project Lead |
-| Status | Draft, 2026-11-10. Data and requirements slides are final. Slides marked **TODO-after-build** need numbers or screenshots from the implementation. |
+| Status | Draft, 2026-11-10. Data and requirements slides are final. Build results filled in on 2026-11-11 (Task 10). |
 | Audience | Highway operator management (and the lecturer acting as management) |
 | Length | ~15 minutes talk + Q&A, 16 slides |
 | Sources | Main exercise brief (slide 32), case study slides, `05-decision-log.md` (D1–D20), `figures/facts.json`, figures F01–F12 |
@@ -134,23 +134,29 @@
   - REQ2: LLM returns JSON `{speed_limit, reason}`; on timeout, error or invalid output → deterministic EU-AQI table (≤ 60 → 80, 61–80 → 70, 81–100 → 60, > 100 → 50) (D14, D15).
   - Combine: final limit = min(REQ1 result, REQ2 result, 80) (D16).
   - Output: limit + reason + source (model / LLM / fallback / rule) shown in the GUI.
-- **Figure:** architecture diagram with router (`figures/architecture_router.png`, **TODO-after-build**: export from the architecture document; not yet in `figures/`).
+- **Figure:** `figures/U02_component_router.png` (component diagram from `10-uml.md`).
+
+  ![Router architecture](figures/U02_component_router.png)
+
 - **Speaker notes:** The system is a router. Simple rules like "is it dark" stay as plain code, because they are defined exactly in the specification. The neural network only decides how much to reduce at night or in black ice, and the language model only handles air quality, with a fixed table behind it if it fails.
 
-## Slide 9 — The model is [better / not better] than a simple average, and the target is reachable in [X]% of reduction hours (TODO-after-build)
+## Slide 9 — The network is only slightly better than a simple average, and the ≤ 1/h target is reachable in 33 % of reduction hours
 
-- **Key message:** TODO-after-build — one sentence on whether the network beats the baseline on unseen days and how often REQ1 is met.
-- **Content (fill after training, test set = days 25–31, D12):**
-  - Model error (MAE near-accidents/h): `[TODO]` vs baseline (mean per condition × limit): `[TODO]`.
-  - Share of dark/ice test hours where some limit is predicted ≤ 1.0: `[TODO] %`; share with "target not reachable": `[TODO] %`.
-  - Distribution of recommended limits on test hours vs historical operator limits: `[TODO]`.
-  - Monotonicity guard activated in `[TODO]` % of predictions.
-  - REQ2: LLM vs fallback agreement on sample AQI cases: `[TODO]`; fallback triggered in `[TODO]` of `[TODO]` calls.
-  - Unit tests: `[TODO]` passing (incl. injected slide-17 faults).
-- **Figure:** TODO-after-build — predicted vs actual near-accidents per hour on test days, or a bar chart model vs baseline MAE.
-- **Speaker notes:** TODO-after-build. Expected framing: "On the last week, which the model never saw, it is [about as good as / slightly better than] a simple average. That is what we expected after slide six: with almost no link between speed limit and incidents, no model can find a strong one."
+- **Key message:** On the unseen last week the network beats the simple average a little (most where it is used: dark/ice hours), reaches the REQ1 target in 33 % of those hours, and needed the guard every time.
+- **Content (test set = days 25–31, D12, model `20261111-0906`):**
+  - Model error (MAE near-accidents/h): **0.876** vs baseline (mean per condition × limit) **0.895** on all 168 test hours; **0.790 vs 0.856** on the 82 dark/ice hours.
+  - Share of dark/ice test hours where a limit ≤ 70 km/h is predicted ≤ 1.0: **32.9 %**; "target not reachable": **67.1 %** (after the final-review fix that keeps the extrapolated 80 km/h value out of the guard).
+  - Recommended limits vs operators (82 h): system 70 ×64, 60 ×17, 50 ×1 · operators 70 ×19, 60 ×55, 50 ×8 (F14). The system reduces less than the operators did.
+  - Monotonicity guard changed the raw curve in **100 %** of dark/ice test hours: unguarded, the network always rated faster as safer (+0.435/h more at 40 than at 80 km/h).
+  - REQ2: live forecast works (Vienna EAQI 45 → no reduction); live LLM call not yet run (no API key on the build machine) — LLM path and all fallbacks covered by 15 unit tests.
+  - Tests: **172 passing** (incl. injected slide-17 faults and offline GUI tests).
+- **Figure:** `figures/F13_model_vs_baseline.png` (and F14 in the appendix).
 
-## Slide 10 — Live demo: three situations, three different decisions (TODO-after-build)
+  ![Model vs baseline](figures/F13_model_vs_baseline.png)
+
+- **Speaker notes:** On the last week, which the model never saw, it is slightly better than a simple average, a bit more so in the dark and icy hours where it is actually used. That is what we expected after slide six. And notice the guard number: left alone, the network would have told us to drive faster every single time, because that is what the history looks like. The guard stops exactly that.
+
+## Slide 10 — Live demo: three situations, three different decisions
 
 - **Key message:** The operator enters conditions and gets a limit with a readable reason in seconds.
 - **Content (demo script, ~2.5 min):**
@@ -159,7 +165,10 @@
   3. **Black ice + poor air** (water 1500 µm, −3 °C, AQI forecast high) → min of REQ1 and REQ2 shown, both reasons listed.
   4. **Failure case:** switch off network / invalid API key for the LLM → fallback table used, source label changes to "fallback".
   5. Optional: start auto-refresh replay from the CSV and let the limit update on the timer (D17).
-- **Figure:** screenshot of GUI (to capture after implementation) — one per scenario as backup if the live demo fails.
+- **Figure:** backup screenshots `evidence/screenshots/S01…S08` (one per scenario). Deep links `http://localhost:8501/?scenario=AT-1` … `AT-8` open each scenario directly.
+
+  ![Dark hour, model decides](evidence/screenshots/S02_AT-2_dark_model_decides.png)
+
 - **Backup plan:** pre-recorded 60-second screen capture and the four screenshots in the appendix.
 - **Speaker notes:** Let me show you how an operator would use this. First a normal day, then a dark night, then black ice with bad air at the same time. Finally I cut the connection to the AI service to show that the system still gives a safe answer from a fixed table.
 
@@ -168,7 +177,7 @@
 - **Key message:** All 12,648 readings in the year N+1 file are identical to year N; the drift check confirms no change, and the check is ready for real new data.
 - **Content:**
   - Row-by-row comparison: 12,648 / 12,648 identical; only difference is the missing header line.
-  - Drift check implemented per feature (distribution test + mean shift, D13): result `[TODO-after-build: "no drift on all features"]`.
+  - Drift check per feature (KS test + mean shift, D13): **no drift on all 12 features** (every KS statistic 0), verdict **no_retrain**, duplicate-dataset warning (`evidence/drift_report.md`).
   - Verdict: no retraining.
   - Caveat: this says nothing about a real next year. Both files are January only.
   - Retraining triggers for the future: drift on any key input, near-accident rate change, new sensors, new season.
@@ -204,7 +213,7 @@
   - Ambiguous metadata is normal; decide from signal behaviour and write it down (code T).
   - Keep exact rules in code and AI where there is no rule (router design).
   - An external LLM in a safety path needs a deterministic fallback from day one.
-  - AI-assisted coding (Claude Code) speeds up build and analysis, but every number still has to be verified against the data. `[TODO-after-build: one concrete example]`
+  - AI-assisted coding (Claude Code) speeds up build and analysis, but every number still has to be verified: the first recon claimed a duplicated `WD` line in SensorTypes; a mutation-checked test showed the line exists only once.
 - **Figure:** none.
 - **Speaker notes:** If we did this again, we would do the data-versus-requirement check on day one, because that single chart reshaped the whole project. We also learned that writing down every assumption saves time later, because nobody has to remember why a choice was made.
 
@@ -214,7 +223,7 @@
 - **Content:**
   - Delivers: data cleaning pipeline with tests, trained neural network, router, REQ2 with LLM and fallback, GUI with manual and replay mode, drift check.
   - Does not deliver: real sensor connection, production deployment, proof that REQ1 is achievable, validation outside January, operator user testing.
-  - Status of each exercise: RE ✔, architecture ✔, data preparation ✔, cleaning code ✔ `[TODO-after-build: confirm]`, retraining analysis ✔, implementation `[TODO-after-build]`.
+  - Status of each exercise: RE ✔, architecture ✔, data preparation ✔, cleaning code ✔ (rules C04–C16, tested on injected faults), retraining analysis ✔, implementation ✔ (training stage, GUI, REQ2; live LLM sample pending an API key).
 - **Figure:** none (two-column list).
 - **Speaker notes:** To be precise about what you are getting: a prototype that works end to end on historical data. It is not connected to real sensors, and it has only seen one winter month.
 
@@ -254,17 +263,19 @@
 | A5 | Light needs a log scale to be a useful input | `figures/F08_lux_log_transform.png` |
 | A6 | 89% of near-accidents are "too close to another car" | `figures/F09_event_composition.png` |
 | A7 | One week of inputs, limits and incidents side by side | `figures/F11_week_overview.png` |
-| A8 | Full decision log D1–D20 | table from `05-decision-log.md` |
-| A9 | GUI screenshots for each demo scenario | screenshot of GUI (to capture after implementation) |
+| A8 | Full decision log D1–D33 | table from `05-decision-log.md` |
+| A9 | GUI screenshots for each demo scenario | `evidence/screenshots/S01…S08` |
+| A10 | System REQ1 choices vs operator limits | `figures/F14_req1_choices_vs_operators.png` |
 
 ## TODO-after-build checklist
 
-- [ ] Slide 8: export architecture/router diagram to `figures/`.
-- [ ] Slide 9: fill MAE model vs baseline, target-reachable share, guard activation rate, REQ2 fallback rate, test count; rewrite the headline with the real result.
-- [ ] Slide 10: capture four GUI screenshots and a 60 s screen recording as backup.
-- [ ] Slide 11: insert drift-check output.
-- [ ] Slide 13: add one concrete example from the AI-assisted coding.
-- [ ] Slide 14: confirm status of the cleaning-code and implementation exercises.
+- [x] Slide 8: router diagram exported (`figures/U02_component_router.png`).
+- [x] Slide 9: numbers filled from `evidence/model_results.json`; headline rewritten.
+- [x] Slide 10: eight GUI screenshots captured. [ ] 60 s screen recording still to record by hand.
+- [x] Slide 11: drift-check output inserted.
+- [x] Slide 13: example added.
+- [x] Slide 14: status confirmed.
+- [ ] Live LLM sample once an API key is available (`evidence/acceptance_run.md`).
 - [ ] Dry run with a timer; cut content if over 15 minutes, never speed up.
 
 ## Q&A prep
@@ -279,7 +290,7 @@ No. The limit was lowered by operators *because* conditions were bad, so bad con
 We trust it for what it is: a January prototype. We do not claim validity for other seasons, and the drift check will flag when new data differs. A full year of data is one of our three asks.
 
 **4. Why use a neural network at all if correlation is 0.008?**
-The brief requires a neural network for the training stage. We kept it small (744 rows) and compare it against a simple average baseline on unseen days, so you can see whether it adds anything. `[TODO-after-build: state result.]` The architecture lets us swap it for a simpler model without touching the rest.
+The brief requires a neural network for the training stage. We kept it small (744 rows) and compare it against a simple average baseline on unseen days, so you can see whether it adds anything. Result: slightly better on unseen days (MAE 0.876 vs 0.895; 0.790 vs 0.856 in dark/ice hours). The architecture lets us swap it for a simpler model without touching the rest.
 
 **5. What happens if the LLM gives a dangerous answer or the API is down?**
 The LLM can only return one of five allowed limits in a fixed JSON format; anything else is rejected. On error, timeout or invalid output, a fixed AQI table decides. The final limit is the minimum of all reasons, so the LLM can only make the limit stricter, never raise it above what REQ1 demands.

@@ -1,0 +1,20 @@
+<section id="demo" data-transition="fade" style="background:#F4F5F1;color:#1C2731;font-family:'Barlow', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:64px;font-weight:600;line-height:1.1">Live demo: the operator gets a limit and a readable reason in seconds</h2>
+<div style="display:flex;gap:40px;align-items:start">
+<img src="/_blob/06b9d4f67762f99fdeb21838c5b3eca9" alt="Operator GUI for a dark hour: 70 km/h set by REQ1, target not reachable, explanation and predicted near-accidents per limit" style="width:600px;height:557px;object-fit:cover;background:#FFFFFF;border:1px solid #DDE1DB;border-radius:12px">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<table style="font-size:28px;color:#1C2731;width:1024px">
+<tr><th style="width:44%">Situation</th><th style="width:20%">Limit</th><th style="width:36%">Set by</th></tr>
+<tr><td>Normal day</td><td>80 km/h</td><td>REQ3 default</td></tr>
+<tr><td>Dark night</td><td>70 km/h</td><td>REQ1 network, flag</td></tr>
+<tr><td>Black ice in daylight</td><td>70 km/h</td><td>REQ1 network</td></tr>
+<tr><td>Water exactly 1000 µm</td><td>80 km/h</td><td>rule not met</td></tr>
+<tr><td>Poor air (EAQI 92)</td><td>60 km/h</td><td>REQ2 table</td></tr>
+<tr><td>Dark + EAQI 105</td><td>50 km/h</td><td>strictest wins</td></tr>
+</table>
+<p style="font-size:24px;color:#6B7680">Each row opens directly with a link such as localhost:8501/?scenario=AT-2.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6B7680">SpeedLimit MVP · 11 · Screenshot S02 · backup screenshots S01–S08</p>
+<aside>Let me show you how an operator uses it. A normal day gives eighty. Set the light to night and the network decides, here seventy, and it tells us honestly that the target is not reachable. Black ice in daylight works the same way. Exactly one thousand micrometres of water is not ice, because the rule says more than one thousand. Poor air brings sixty from the table, and when night and very poor air come together, the strictest reason wins at fifty. If the live demo fails, every scenario is in the backup screenshots.</aside>
+</section>

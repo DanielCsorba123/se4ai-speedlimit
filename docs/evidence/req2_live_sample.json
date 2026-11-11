@@ -1,0 +1,27 @@
+{
+  "captured_at": "2026-11-11T09:17:50",
+  "location": [
+    48.21,
+    16.37
+  ],
+  "source": "Open-Meteo air-quality forecast (live)",
+  "summary": {
+    "eaqi_max": 45.0,
+    "eaqi_mean": 43.7,
+    "eaqi_hourly": [
+      45,
+      43,
+      43
+    ],
+    "pm25_max": 22.9,
+    "pm10_max": 27.4,
+    "no2_max": 28.2,
+    "o3_max": 29.0
+  },
+  "req2_result": {
+    "limit": 80,
+    "source": "none",
+    "reason": "Air quality not poor (EAQI max 45)."
+  },
+  "llm_live_call": "not run: no Anthropic credentials on this machine (set ANTHROPIC_API_KEY and re-run analysis step)"
+}

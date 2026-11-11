@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "speedlimit"
+version = "0.1.0"
+description = "SE4AI SpeedLimit MVP: NN-based speed limit for dark/icy conditions + LLM air-quality advice"
+requires-python = ">=3.13"
+dependencies = [
+  "pandas>=3.0",
+  "numpy>=2.0",
+  "scikit-learn>=1.6",
+  "scipy>=1.14",
+  "joblib>=1.4",
+  "pyyaml>=6.0",
+  "requests>=2.32",
+  "anthropic>=0.50",
+  "streamlit>=1.40",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "matplotlib>=3.9", "playwright>=1.48"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+markers = [
+  "realdata: uses the course CSVs in the repo root",
+  "network: needs internet / API keys (skipped by default)",
+]
+addopts = "-m 'not network'"

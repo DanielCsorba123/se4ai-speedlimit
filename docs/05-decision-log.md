@@ -43,6 +43,10 @@ Each decision has an ID that the other documents refer to (e.g. "per D1").
 | D31 | GUI AQI field | The GUI has a manual AQI field. It's used for demo/test mode and as step (2) of D26. | Demo scenarios need to drive REQ2 without depending on the live forecast. | — |
 | D32 | Extrapolation warning | Cells with no training data (80 km/h in dark or black-ice hours, 40 km/h with black ice) are marked "extrapolated" in the GUI's per-limit table and in the model card. | Predictions there are pure extrapolation. Showing that keeps users from over-trusting them. | F04 |
 
+| D33 | REQ1 candidate set | When REQ1 is active, the candidates are {40, 50, 60, 70}. 80 km/h is excluded. Configurable as `decide.req1_max_limit`. | REQ1 says the limit "shall be reduced". Operators used 80 in 0 of 389 dark/ice hours, so that cell is pure extrapolation (D32). With the D9 guard, a confounded flat curve plus D25 would otherwise keep 80 in the dark. Found while implementing Task 5. | F04 |
+
+| D34 | Guard scope and fail-safe REQ1 (final review) | The D9 guard runs over the REQ1 candidates only (≤ `req1_max_limit`); 80 km/h keeps its raw value for display. With a missing light, water or temperature input, REQ1 uses the per-condition baseline table, because the network cannot run on NaN. The LLM gets one attempt (no SDK retries), failed calls are cached for 5 min, and a failed forecast fetch waits 60 s before the next try. | Found by the final whole-branch review: the extrapolated 80 km/h prediction faked a reachable target in 29 of 389 dark/ice hours, and a missing input crashed REQ1 with a model loaded. | F04 |
+
 ## Review round 1 (2026-11-10): where the perspective reviews landed
 
 | Raised by | Point | Resolved in |
