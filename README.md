@@ -26,6 +26,14 @@ export ANTHROPIC_API_KEY=...
 | Dossier site | `python analysis/build_dossier.py` |
 | Test fixtures | `python tests/fixtures/make_fixtures.py` |
 
+## GUI environment overrides
+
+| Variable | Effect |
+|---|---|
+| `SPEEDLIMIT_OFFLINE=1` | No Open-Meteo call, LLM off (tests, offline demos) |
+| `SPEEDLIMIT_MODELS_DIR` | Folder with `latest.joblib` / `baseline_table.json` (default `models/`) |
+| `SPEEDLIMIT_LOGS_DIR` | Folder for `decisions.jsonl` / `llm_calls.jsonl` (default `logs/`) |
+
 ## Layout
 
 - `src/speedlimit/`: the package. `config.py` holds the typed settings; `domain.py` holds the shared value types (architecture §4.3).
