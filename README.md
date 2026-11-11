@@ -2,6 +2,8 @@
 
 Sets a highway speed limit automatically. The default is 80 km/h. A neural network reduces it when it is dark or there is black-ice danger (REQ1), and an LLM reduces it when poor air quality is forecast (REQ2). Course case study *SpeedLimit*, exercise SpeedLimit21.
 
+**Continuing the work?** Start with [docs/HANDOFF.md](docs/HANDOFF.md) (state, setup on a new machine, open review items).
+
 ## Presentation and dossier
 
 Open without any account: [deck (PDF)](docs/exports/SpeedLimit_Management_Deck.pdf) · [deck (PPTX)](docs/exports/SpeedLimit_Management_Deck.pptx) · [project dossier (PDF)](docs/exports/SpeedLimit_Project_Dossier.pdf).
