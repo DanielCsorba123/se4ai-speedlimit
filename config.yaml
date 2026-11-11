@@ -76,4 +76,4 @@ gui:
 
 drift:                             # D13, D21
   alpha: 0.05
-  mean_shift_rel: 0.10
+  mean_shift_sd: 0.5               # |mean_new - mean_ref| / std_ref (arch 10.2)

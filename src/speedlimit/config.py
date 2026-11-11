@@ -103,7 +103,7 @@ class GUIConfig:
 @dataclass(frozen=True)
 class DriftConfig:
     alpha: float
-    mean_shift_rel: float
+    mean_shift_sd: float
 
 
 @dataclass(frozen=True)
