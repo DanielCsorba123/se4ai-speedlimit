@@ -164,9 +164,9 @@ Status tags:
 - **Why it matters:** Current and forecast values come from different endpoints and can differ a lot.
 - **Next time:** Map each requirement verb to a concrete data source in the specification.
 
-### L4.4 Real LLM behaviour `[to confirm after implementation]`
+### L4.4 Real LLM behaviour `[observed now]`
 
-- **What happened:** Still open: the build machine had no Anthropic API key, so no live LLM call ran. Every LLM branch (valid JSON, prose, out-of-set limit, extra key, refusal, timeout, implausible answer, cache, budget) is tested with a fake client, and the live forecast path works.
+- **What happened:** We switched REQ2 to Groq's free tier (D37) behind a provider setting, without touching validation or fallbacks. Live, gpt-oss-120b chose 60 / 50 / 40 km/h for EAQI 70 / 92 / 115 in 1.2–2.2 s: always valid JSON, always one step stricter than the table, with a reason naming the values. Every failure branch stays tested with fake clients.
 - **Why it matters:** These numbers decide whether the LLM adds value over the fixed table.
 - **Next time:** Run a small fixed evaluation set (e.g. 20 AQI scenarios) on every prompt change.
 

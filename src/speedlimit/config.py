@@ -83,6 +83,7 @@ class AQConfig:
 @dataclass(frozen=True)
 class LLMConfig:
     enabled: bool
+    provider: str
     model: str
     effort: str
     max_tokens: int
@@ -134,8 +135,21 @@ def _build(cls, data: dict, where: str):
     return cls(**data)
 
 
+def _load_dotenv(folder: Path) -> None:
+    """Secrets (GROQ_API_KEY, ANTHROPIC_API_KEY) from .env or .env.txt next to config.yaml.
+
+    Both files are git-ignored. Values already set in the environment win.
+    """
+    from dotenv import load_dotenv
+    for name in (".env", ".env.txt"):
+        f = folder / name
+        if f.is_file():
+            load_dotenv(f, override=False)
+
+
 def load_config(path: Path = Path("config.yaml")) -> Config:
     path = Path(path)
+    _load_dotenv(path.resolve().parent)
     raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     base = path.resolve().parent
 

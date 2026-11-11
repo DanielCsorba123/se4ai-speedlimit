@@ -18,7 +18,7 @@ SHOTS = {
     "S03_AT-3_black_ice_daylight": "AT-3",
     "S04a_AT-4_threshold_water_1000": "AT-4a",
     "S04b_AT-4_threshold_water_1001": "AT-4b",
-    "S05_AT-5-7_poor_air_table": "AT-5",
+    "S05_AT-5_poor_air_llm": "AT-5",
     "S06_AT-6_target_not_reachable": "AT-6",
     "S08_AT-8_most_restrictive_wins": "AT-8",
 }

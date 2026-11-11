@@ -149,3 +149,15 @@ def test_scenario_at8_most_restrictive_wins(env):
 def test_unknown_scenario_is_ignored(env):
     at = _scenario("nope")
     assert not at.exception and at.metric[0].value.endswith("km/h")
+
+
+def test_simulated_forecast_goes_through_llm_path(env):
+    """Offline the LLM is disabled, so the simulated poor forecast lands on the table with that reason (not 'manual')."""
+    at = _run()
+    at.slider(key="log_lux").set_value(4.0).run()
+    at.slider(key="water").set_value(0.0).run()
+    at.number_input(key="sim_aqi").set_value(92.0).run()
+    assert not at.exception
+    assert at.metric[0].value == "60 km/h"
+    text = _texts(at) + " ".join(t.value for t in at.text)
+    assert "table" in text.lower() and "manual" not in text.lower()

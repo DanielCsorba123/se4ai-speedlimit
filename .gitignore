@@ -10,3 +10,6 @@ site/
 .superpowers/
 analysis/scratch/
 *.egg-info/
+.env.txt
+.env.*
+!.env.example

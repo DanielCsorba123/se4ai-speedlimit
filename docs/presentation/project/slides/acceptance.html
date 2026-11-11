@@ -1,15 +1,15 @@
 <section id="acceptance" data-transition="fade" style="background:#F4F5F1;color:#1C2731;font-family:'Barlow', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
-<h2 style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:64px;font-weight:600;line-height:1.1">Seven of eight acceptance scenarios pass; the LLM still needs a live run</h2>
+<h2 style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:64px;font-weight:600;line-height:1.1">All eight acceptance scenarios pass, including the live LLM</h2>
 <div style="display:flex;gap:48px;align-items:start">
 <div style="width:500px;display:flex;flex-direction:column;gap:28px">
-<div><p style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:112px;font-weight:700;line-height:1">172</p><p style="font-size:28px;color:#4A5560">automated tests passing</p></div>
-<div><p style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:112px;font-weight:700;line-height:1">7 / 8</p><p style="font-size:28px;color:#4A5560">demo scenarios pass</p></div>
+<div><p style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:112px;font-weight:700;line-height:1">185</p><p style="font-size:28px;color:#4A5560">automated tests passing</p></div>
+<div><p style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:112px;font-weight:700;line-height:1">8 / 8</p><p style="font-size:28px;color:#4A5560">demo scenarios pass</p></div>
 </div>
 <div style="flex:1;display:flex;flex-direction:column;gap:20px">
 <div style="background:#FFFFFF;border:1px solid #DDE1DB;border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:10px"><h3 style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:40px;font-weight:600">Tests found real bugs</h3><p style="font-size:28px;color:#4A5560;line-height:1.35">A spike filter that flagged healthy sensors, a replay timer that skipped hours, and a rule that would have kept 80 km/h in the dark.</p></div>
-<div style="background:#FFFFFF;border:1px solid #DDE1DB;border-left:8px solid #E2A00F;border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:10px"><h3 style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:40px;font-weight:600">Partial: poor air via the LLM</h3><p style="font-size:28px;color:#4A5560;line-height:1.35">No API key on the build machine yet. The fallback table answered correctly; all LLM paths are tested with a simulated model.</p></div>
+<div style="background:#FFFFFF;border:1px solid #DDE1DB;border-left:8px solid #1F7A5C;border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:10px"><h3 style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:40px;font-weight:600">Live LLM on the Groq free tier</h3><p style="font-size:28px;color:#4A5560;line-height:1.35">For poor air (EAQI 70, 92, 115) it chose 60, 50 and 40 km/h in 1–2 s, each one step stricter than the fallback table, with a readable reason.</p></div>
 </div>
 </div>
-<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6B7680">SpeedLimit MVP · 12 · Acceptance run 2026-11-11</p>
-<aside>All 172 automated tests pass, and seven of our eight demo scenarios pass in the real interface. The tests did their job: they found three real bugs before anyone saw them. One scenario is only partial: the build machine had no key for the language model yet, so the fixed table answered. Every language-model path is tested with a simulated model, and one live run is on our to-do list.</aside>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6B7680">SpeedLimit MVP · 12 · Acceptance run 2026-11-11 · LLM openai/gpt-oss-120b via Groq</p>
+<aside>All 185 automated tests pass, and all eight demo scenarios pass in the real interface. The tests did their job: they found three real bugs before anyone saw them. The language model now runs live on Groq’s free tier. For poor, very poor and extremely poor air it chose sixty, fifty and forty kilometres per hour within one to two seconds, always a step stricter than our fixed table, and it explains why. If it fails or answers nonsense, the table still decides.</aside>
 </section>

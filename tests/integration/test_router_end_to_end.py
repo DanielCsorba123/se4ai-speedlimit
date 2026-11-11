@@ -31,7 +31,8 @@ class _SpyStub:
 class _FakeLLM:
     def __init__(self, limit):
         self.limit, self.requests = limit, []
-        self.beta = SimpleNamespace(messages=SimpleNamespace(create=self._create))
+        self.beta = SimpleNamespace(messages=SimpleNamespace(create=self._create))          # anthropic shape
+        self.chat = SimpleNamespace(completions=SimpleNamespace(create=self._create_groq))  # groq shape
 
     def with_options(self, **kw):
         return self
@@ -40,6 +41,11 @@ class _FakeLLM:
         self.requests.append(kw)
         return SimpleNamespace(stop_reason="end_turn", model=kw["model"], content=[
             SimpleNamespace(type="text", text=json.dumps({"speed_limit": self.limit, "reason": "NO2 high."}))])
+
+    def _create_groq(self, **kw):
+        self.requests.append(kw)
+        msg = SimpleNamespace(content=json.dumps({"speed_limit": self.limit, "reason": "NO2 high."}))
+        return SimpleNamespace(model=kw["model"], choices=[SimpleNamespace(finish_reason="stop", message=msg)])
 
 
 RATES = {40: .5, 50: .7, 60: .9, 70: 1.1, 80: 1.4}      # REQ1 -> 60

@@ -115,3 +115,18 @@ def table_limit(eu_aqi: float, cfg: AQConfig) -> int:
 def is_poor(eu_aqi: float, cfg: AQConfig) -> bool:
     """D14: poor air quality = EU AQI above the threshold (60)."""
     return round(float(eu_aqi)) > cfg.poor_aqi_threshold
+
+
+def simulated_summary(eaqi: float, cfg: AQConfig, now: datetime | None = None) -> AQSummary:
+    """Demo forecast with a chosen EAQI (D38): same shape as a real summary, sent through the real LLM path.
+
+    Pollutant values are scaled from the index so the prompt looks like a plausible forecast.
+    """
+    now = (now or datetime.now()).replace(minute=0, second=0, microsecond=0)
+    e = float(eaqi)
+    hourly = [int(round(e)) - 8, int(round(e)), int(round(e)) - 4][: cfg.horizon_hours]
+    hourly += [int(round(e))] * (cfg.horizon_hours - len(hourly))
+    return AQSummary(lat=cfg.latitude, lon=cfg.longitude, decision_time=now, horizon_h=cfg.horizon_hours,
+                     eaqi_max=e, eaqi_mean=e - 6, pm25_max=e * 0.45, pm25_mean=e * 0.4, pm10_max=e * 0.7,
+                     pm10_mean=e * 0.6, no2_max=e * 0.9, no2_mean=e * 0.8, o3_max=40.0, o3_mean=35.0,
+                     eaqi_hourly=hourly)

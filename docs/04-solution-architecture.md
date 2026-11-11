@@ -398,7 +398,7 @@ sequenceDiagram
 
 | Setting | Value | Note |
 |---|---|---|
-| Model | `claude-opus-5-5` (config `llm.model`) | Current default Claude model (changed from Sonnet during implementation, Task 6 ruling). Can be switched to `claude-sonnet-5-5` in config without code change. |
+| Model | `openai/gpt-oss-120b` on Groq (config `llm.provider` + `llm.model`, D37) | Free tier, strict JSON schema. `provider: anthropic` with `claude-opus-5-5` remains available without code change. |
 | Endpoint | `client.messages.create(...)` via the anthropic SDK (D18) | No raw HTTP |
 | Output format | Structured output: `output_config={"format": {"type": "json_schema", "schema": SCHEMA}}` | Guarantees schema-shaped JSON; we still validate (7.4) |
 | Effort | `output_config.effort = "low"` | Simple classification-like task; keeps latency and cost down |

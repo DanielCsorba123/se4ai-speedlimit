@@ -148,8 +148,8 @@
   - Share of dark/ice test hours where a limit ≤ 70 km/h is predicted ≤ 1.0: **32.9 %**; "target not reachable": **67.1 %** (after the final-review fix that keeps the extrapolated 80 km/h value out of the guard).
   - Recommended limits vs operators (82 h): system 70 ×64, 60 ×17, 50 ×1 · operators 70 ×19, 60 ×55, 50 ×8 (F14). The system reduces less than the operators did.
   - Monotonicity guard changed the raw curve in **100 %** of dark/ice test hours: unguarded, the network always rated faster as safer (+0.435/h more at 40 than at 80 km/h).
-  - REQ2: live forecast works (Vienna EAQI 45 → no reduction); live LLM call not yet run (no API key on the build machine) — LLM path and all fallbacks covered by 15 unit tests.
-  - Tests: **172 passing** (incl. injected slide-17 faults and offline GUI tests).
+  - REQ2: live forecast works (Vienna EAQI 45 → no reduction); live LLM on Groq's free tier (D37) chose 60 / 50 / 40 km/h for EAQI 70 / 92 / 115 in 1–2 s, each stricter than the table.
+  - Tests: **185 passing** (incl. injected slide-17 faults and offline GUI tests).
 - **Figure:** `figures/F13_model_vs_baseline.png` (and F14 in the appendix).
 
   ![Model vs baseline](figures/F13_model_vs_baseline.png)
@@ -264,7 +264,7 @@
 - [x] Slide 11: drift-check output inserted.
 - [x] Slide 13: example added.
 - [x] Slide 14: status confirmed.
-- [ ] Live LLM sample once an API key is available (`evidence/acceptance_run.md`).
+- [x] Live LLM sample captured (`evidence/llm_sample.json`).
 - [ ] Dry run with a timer; cut content if over 15 minutes, never speed up.
 
 ## Q&A prep

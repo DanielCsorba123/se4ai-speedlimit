@@ -48,7 +48,7 @@ SCENARIOS = {
     "AT-3": {"at": (25, 11), "log_lux": math.log10(30000), "water": 1500.0, "temp": -2.0, "manual_aqi": 25.0},
     "AT-4a": {"at": (25, 11), "log_lux": math.log10(30000), "water": 1000.0, "temp": -2.0, "manual_aqi": 25.0},
     "AT-4b": {"at": (25, 11), "log_lux": math.log10(30000), "water": 1001.0, "temp": -2.0, "manual_aqi": 25.0},
-    "AT-5": {"at": (25, 13), "log_lux": math.log10(25000), "water": 200.0, "temp": 4.0, "manual_aqi": 92.0},
+    "AT-5": {"at": (25, 13), "log_lux": math.log10(25000), "water": 200.0, "temp": 4.0, "sim_aqi": 92.0},
     "AT-6": {"at": (25, 3), "log_lux": -2.0, "water": 3000.0, "temp": -8.0, "manual_aqi": 25.0},
     "AT-8": {"at": (25, 22), "log_lux": -1.0, "water": 200.0, "temp": 4.0, "manual_aqi": 105.0},
 }
@@ -132,6 +132,9 @@ def _situation_from_row(day: int, hour: int, row) -> Situation:
 
 
 def _aq_summary(cfg, use_forecast: bool):
+    sim = st.session_state.get("sim_aqi")
+    if sim is not None:                                   # D38: demo forecast through the real LLM path
+        return air_quality.simulated_summary(sim, cfg.air_quality)
     if OFFLINE or not use_forecast:
         return None
     fc = air_quality.fetch_forecast(cfg.air_quality.latitude, cfg.air_quality.longitude, cfg.air_quality)
@@ -225,8 +228,10 @@ def main() -> None:
         st.markdown("**Air quality**")
         use_forecast = st.checkbox("Use Open-Meteo forecast", value=not OFFLINE, key="use_forecast",
                                    disabled=OFFLINE)
-        st.number_input("Manual EAQI (optional)", min_value=0.0, max_value=500.0, value=None, step=1.0,
-                        key="manual_aqi")
+        st.number_input("Simulated forecast EAQI (demo, asks the LLM)", min_value=0.0, max_value=500.0,
+                        value=None, step=1.0, key="sim_aqi")
+        st.number_input("Manual EAQI (optional, uses the table)", min_value=0.0, max_value=500.0, value=None,
+                        step=1.0, key="manual_aqi")
 
     aq = _aq_summary(cfg, use_forecast)
     manual = st.session_state.get("manual_aqi")

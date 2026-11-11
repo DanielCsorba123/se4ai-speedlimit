@@ -53,3 +53,26 @@ def test_api_key_never_in_config():
 
     secret = re.compile(r"(^|_)(api_?key|key|secret|token|password)$")
     assert not [k for k in keys(yaml.safe_load(text)) if secret.search(k)]
+
+
+@pytest.mark.parametrize("name", [".env", ".env.txt"])
+def test_dotenv_file_next_to_config_is_loaded(tmp_path, monkeypatch, name):
+    import os
+    monkeypatch.delenv("SPEEDLIMIT_TEST_KEY", raising=False)
+    (tmp_path / "config.yaml").write_text((ROOT / "config.yaml").read_text(encoding="utf-8"), encoding="utf-8")
+    (tmp_path / name).write_text('SPEEDLIMIT_TEST_KEY="from-file"\n', encoding="utf-8")
+    try:
+        load_config(tmp_path / "config.yaml")
+    except ValueError:
+        pass                                  # copied config points at CSVs that are not in tmp; env is loaded first
+    assert os.environ.get("SPEEDLIMIT_TEST_KEY") == "from-file"
+    monkeypatch.delenv("SPEEDLIMIT_TEST_KEY", raising=False)
+
+
+def test_dotenv_does_not_override_existing_env(tmp_path, monkeypatch):
+    import os
+    monkeypatch.setenv("SPEEDLIMIT_TEST_KEY", "from-shell")
+    (tmp_path / "config.yaml").write_text((ROOT / "config.yaml").read_text(encoding="utf-8"), encoding="utf-8")
+    (tmp_path / ".env").write_text("SPEEDLIMIT_TEST_KEY=from-file\n", encoding="utf-8")
+    load_config(tmp_path / "config.yaml")
+    assert os.environ["SPEEDLIMIT_TEST_KEY"] == "from-shell"

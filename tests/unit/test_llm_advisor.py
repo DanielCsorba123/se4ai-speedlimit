@@ -1,4 +1,5 @@
-"""LLM advisor (REQ2, D14, D15, D26) with a fake Anthropic client. No network."""
+"""LLM advisor (REQ2, D14, D15, D26), Anthropic provider path, with a fake client. No network."""
+import dataclasses
 import json
 from datetime import datetime
 from pathlib import Path
@@ -11,7 +12,9 @@ from speedlimit.config import load_config
 from speedlimit.domain import AQSummary
 
 ROOT = Path(__file__).resolve().parents[2]
-CFG = load_config(ROOT / "config.yaml")
+_BASE = load_config(ROOT / "config.yaml")
+# these tests exercise the Anthropic provider path; the Groq path has its own tests (test_llm_groq.py)
+CFG = dataclasses.replace(_BASE, llm=dataclasses.replace(_BASE.llm, provider="anthropic", model="claude-opus-5-5"))
 
 
 def _summary(eaqi_max=95.0):

@@ -1,0 +1,35 @@
+{
+  "captured_at": "2026-11-11T15:35:26",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "note": "Synthetic forecast summaries (live Vienna air was not poor). Only numbers are sent; no key is stored.",
+  "calls": [
+    {
+      "scenario": "AT-5 (EAQI 92, very poor)",
+      "eaqi_max": 92.0,
+      "limit": 50,
+      "source": "llm",
+      "table_limit": 60,
+      "latency_s": 2.02,
+      "reason": "EAQI max 92 (very poor) and high NO2 82.8 µg/m³ and PM10 64.4 µg/m³ indicate severe pollution, so limit reduced to 50 km/h."
+    },
+    {
+      "scenario": "EAQI 70 (poor)",
+      "eaqi_max": 70.0,
+      "limit": 60,
+      "source": "llm",
+      "table_limit": 70,
+      "latency_s": 1.2,
+      "reason": "European AQI max 70 and mean 64 fall in the poor (60-80) band, triggering a speed reduction."
+    },
+    {
+      "scenario": "EAQI 115 (extremely poor)",
+      "eaqi_max": 115.0,
+      "limit": 40,
+      "source": "llm",
+      "table_limit": 50,
+      "latency_s": 2.18,
+      "reason": "European AQI values are 115/109 (max/mean) and hourly 107‑115, exceeding 100, indicating extremely poor air quality. Therefore limit reduced to 40 km/h."
+    }
+  ]
+}

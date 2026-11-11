@@ -13,11 +13,13 @@ python -m venv .venv
 .venv/Scripts/python -m pip install -e ".[dev]"
 ```
 
-Copy your Anthropic key into the environment (never into `config.yaml`):
+Put your Groq API key (free tier) into a `.env` or `.env.txt` file next to `config.yaml` (both are git-ignored, never into `config.yaml`):
 
-```bash
-export ANTHROPIC_API_KEY=...
 ```
+GROQ_API_KEY="gsk_..."
+```
+
+To use Anthropic instead, set `llm.provider: anthropic` and `ANTHROPIC_API_KEY`.
 
 ## Run
 
@@ -27,6 +29,7 @@ export ANTHROPIC_API_KEY=...
 | Train (Task 4) | `.venv/Scripts/python -m speedlimit.cli_train --config config.yaml` |
 | GUI (Task 8) | `.venv/Scripts/streamlit run src/speedlimit/app.py` |
 | Evidence figures | `python analysis/make_figures.py` |
+| Live LLM sample | `.venv/Scripts/python analysis/llm_live_sample.py` |
 | Dossier site | `python analysis/build_dossier.py` |
 | Test fixtures | `python tests/fixtures/make_fixtures.py` |
 

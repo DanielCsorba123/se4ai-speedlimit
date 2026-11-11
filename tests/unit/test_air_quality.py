@@ -115,3 +115,11 @@ def test_failed_fetch_is_not_retried_immediately():
     assert len(s.calls) == 1
     later = aq.fetch_forecast(48.21, 16.37, CFG.air_quality, session=s, now=NOW + timedelta(minutes=2))
     assert later is not None and len(s.calls) == 2
+
+
+def test_simulated_summary_for_demo():
+    """D38: a demo forecast with a chosen EAQI, sent through the real LLM path."""
+    s = aq.simulated_summary(92.0, CFG.air_quality, now=NOW)
+    assert s.eaqi_max == 92.0 and s.eaqi_hourly[1] == 92 and len(s.eaqi_hourly) == CFG.air_quality.horizon_hours
+    assert s.lat == CFG.air_quality.latitude
+    assert s.pm10_max > 0 and s.no2_max > 0

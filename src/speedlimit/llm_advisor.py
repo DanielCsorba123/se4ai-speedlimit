@@ -120,7 +120,16 @@ def _log(path: Path | None, entry: dict) -> None:
         fh.write(json.dumps(entry, default=str) + "\n")
 
 
-def _call(client, system: str, user: str, cfg: Config):
+def _default_client(cfg: Config):
+    """Real SDK client for the configured provider; the key comes from the environment only."""
+    if cfg.llm.provider == "groq":
+        import groq
+        return groq.Groq()                    # reads GROQ_API_KEY; raises if it is missing
+    import anthropic
+    return anthropic.Anthropic()
+
+
+def _call_anthropic(client, system: str, user: str, cfg: Config) -> tuple[str, str, str | None]:
     kwargs = dict(
         model=cfg.llm.model, max_tokens=cfg.llm.max_tokens, system=system,
         messages=[{"role": "user", "content": user}],
@@ -128,8 +137,28 @@ def _call(client, system: str, user: str, cfg: Config):
     )
     if cfg.llm.server_fallback:
         kwargs |= {"betas": [FALLBACK_BETA], "fallbacks": "default"}
-    return client.with_options(timeout=cfg.llm.timeout_s, max_retries=cfg.llm.max_retries).beta.messages.create(
+    resp = client.with_options(timeout=cfg.llm.timeout_s, max_retries=cfg.llm.max_retries).beta.messages.create(
         **kwargs)
+    raw = next((b.text for b in resp.content if b.type == "text"), "")
+    return ("ok" if resp.stop_reason == "end_turn" else resp.stop_reason), raw, getattr(resp, "model", None)
+
+
+def _call_groq(client, system: str, user: str, cfg: Config) -> tuple[str, str, str | None]:
+    """Groq chat completion with strict JSON-schema output (gpt-oss models)."""
+    resp = client.with_options(timeout=cfg.llm.timeout_s, max_retries=cfg.llm.max_retries).chat.completions.create(
+        model=cfg.llm.model, max_tokens=cfg.llm.max_tokens,
+        messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
+        response_format={"type": "json_schema",
+                         "json_schema": {"name": "speed_limit_advice", "strict": True, "schema": SCHEMA}},
+    )
+    choice = resp.choices[0]
+    return ("ok" if choice.finish_reason == "stop" else choice.finish_reason), choice.message.content or "", \
+        getattr(resp, "model", None)
+
+
+def _call(client, system: str, user: str, cfg: Config) -> tuple[str, str, str | None]:
+    """-> (status "ok" or the stop reason, raw text, model that served it)."""
+    return (_call_groq if cfg.llm.provider == "groq" else _call_anthropic)(client, system, user, cfg)
 
 
 def advise(summary: AQSummary | None, cfg: Config, client=None, log_path: Path | None = None,
@@ -160,14 +189,11 @@ def advise(summary: AQSummary | None, cfg: Config, client=None, log_path: Path |
     t0 = time.perf_counter()
     try:
         if client is None:
-            import anthropic
-            client = anthropic.Anthropic()
-        resp = _call(client, system, user, cfg)
-        entry |= {"stop_reason": resp.stop_reason, "served_by": getattr(resp, "model", None)}
-        if resp.stop_reason != "end_turn":                                           # V1
-            raise InvalidAdvice(f"stop_reason {resp.stop_reason}")
-        raw = next((b.text for b in resp.content if b.type == "text"), "")
-        entry["raw"] = raw
+            client = _default_client(cfg)
+        status, raw, served_by = _call(client, system, user, cfg)
+        entry |= {"provider": cfg.llm.provider, "stop_reason": status, "served_by": served_by, "raw": raw}
+        if status != "ok":                                                           # V1
+            raise InvalidAdvice(f"stop_reason {status}")
         limit, reason = validate(raw, summary, cfg)                                  # V2-V4
         result = Req2Result(limit=limit, reason=reason, source="llm", aq=summary)
     except InvalidAdvice as e:
