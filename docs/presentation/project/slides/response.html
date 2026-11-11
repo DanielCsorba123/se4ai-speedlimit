@@ -1,0 +1,25 @@
+<section id="response" data-transition="fade" style="background:#F4F5F1;color:#1C2731;font-family:'Barlow', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<h2 style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:64px;font-weight:600;line-height:1.1">We built REQ1 as specified, with three safeguards and an honest flag</h2>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#FFFFFF;padding:40px;border:1px solid #DDE1DB;border-radius:12px">
+<x-icon name="Lock" style="color:#1C2731;width:56px;height:56px"></x-icon>
+<h3 style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:40px;font-weight:600;line-height:1.15">Never “faster is safer”</h3>
+<p style="font-size:28px;color:#4A5560;line-height:1.35">A guard makes sure a lower limit is never rated riskier than a higher one.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#FFFFFF;padding:40px;border:1px solid #DDE1DB;border-radius:12px">
+<x-icon name="Warning" style="color:#1C2731;width:56px;height:56px"></x-icon>
+<h3 style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:40px;font-weight:600;line-height:1.15">Always reduce</h3>
+<p style="font-size:28px;color:#4A5560;line-height:1.35">In the dark or on ice the system chooses 70 km/h or lower, never 80.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#FFFFFF;padding:40px;border:1px solid #DDE1DB;border-radius:12px">
+<x-icon name="Chart" style="color:#1C2731;width:56px;height:56px"></x-icon>
+<h3 style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:40px;font-weight:600;line-height:1.15">No false precision</h3>
+<p style="font-size:28px;color:#4A5560;line-height:1.35">If no limit meets the target, take the highest one within 0.05/h of the best.</p>
+</div>
+</div>
+<div style="display:flex;gap:24px;align-items:center;background:#FFFFFF;border:1px solid #DDE1DB;border-left:8px solid #C4302B;border-radius:12px;padding:28px 36px">
+<p style="font-size:32px;color:#1C2731;line-height:1.35"><b>Target not reachable</b> is shown to the operator with the predicted rate, instead of being hidden.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6B7680">SpeedLimit MVP · 7 · Decisions D7, D8, D9, D25, D33</p>
+<aside>We did not change the requirement; we built it as written and protected it. A guard stops the model from recommending higher speeds because of that confounded history. When REQ1 is active the system always reduces. And when no limit reaches the target, it does not buy a meaningless improvement with twenty kilometres per hour. Above all, the operator sees when the target is out of reach.</aside>
+</section>

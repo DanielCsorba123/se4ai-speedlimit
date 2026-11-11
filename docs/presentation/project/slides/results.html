@@ -1,0 +1,13 @@
+<section id="results" data-transition="fade" style="background:#F4F5F1;color:#1C2731;font-family:'Barlow', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:64px;font-weight:600;line-height:1.1">On unseen days the network is only slightly better than a simple average</h2>
+<div style="display:flex;gap:40px;align-items:start">
+<img src="/_blob/2bdb038263cca0e0e21cc5226d4b298c" alt="Mean absolute error: network 0.876 vs baseline 0.895 on all test hours, 0.790 vs 0.856 on dark and icy test hours" style="width:1060px;height:500px;object-fit:contain;background:#FFFFFF;border-radius:12px">
+<div style="flex:1;display:flex;flex-direction:column;gap:28px">
+<div><p style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:72px;font-weight:700;line-height:1">0.79 vs 0.86</p><p style="font-size:28px;color:#4A5560">error in dark and icy hours, network vs average</p></div>
+<div><p style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:72px;font-weight:700;line-height:1">38 %</p><p style="font-size:28px;color:#4A5560">of those hours reach the ≤ 1/h target</p></div>
+<div><p style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:72px;font-weight:700;line-height:1">4 s</p><p style="font-size:28px;color:#4A5560">to retrain on the full month</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6B7680">SpeedLimit MVP · 9 · Test days 25–31 (168 h, 82 dark/icy) · Figure F13</p>
+<aside>We trained on the first twenty-four days and tested on the last week, which the model never saw. It beats a simple average only slightly overall, a bit more in the dark and icy hours where it is actually used. That is exactly what the previous finding predicted. The target of one near-accident per hour is reachable in thirty-eight percent of those hours.</aside>
+</section>

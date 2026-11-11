@@ -1,0 +1,20 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-11-11T10:45:00Z"},
+  "lists": "css",
+  "title": "SpeedLimit MVP – Results for Management",
+  "order": ["cover", "goal", "given", "requirements", "dataquality", "hero", "response", "architecture", "results", "guard", "demo", "acceptance", "retraining", "risks", "lessons", "scope", "asks"],
+  "sections": {
+    "s1": {"description": "The problem: an automatic speed limit for dark, icy and polluted hours.", "start": "cover"},
+    "s2": {"description": "What we were given and what requirements and data work turned it into.", "start": "given"},
+    "s3": {"description": "The key finding: the data cannot show the speed limit reducing near-accidents.", "start": "hero"},
+    "s4": {"description": "The solution: a router with rules, a guarded neural network and an LLM with fallback.", "start": "architecture"},
+    "s5": {"description": "Results: model quality, live demo, acceptance and the retraining verdict.", "start": "results"},
+    "s6": {"description": "Risks, lessons learned, scope and the decisions we ask for.", "start": "risks"}
+  },
+  "faces": {
+    "barlow-condensed": {"family": "Barlow Condensed", "href": "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=swap"},
+    "barlow": {"family": "Barlow", "href": "https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&display=swap"}
+  },
+  "designSystems": []
+}

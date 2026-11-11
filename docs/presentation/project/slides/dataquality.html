@@ -1,0 +1,13 @@
+<section id="dataquality" data-transition="fade" style="background:#F4F5F1;color:#1C2731;font-family:'Barlow', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:64px;font-weight:600;line-height:1.1">The data is clean in format but ambiguous in meaning</h2>
+<div style="display:flex;gap:40px;align-items:start">
+<img src="/_blob/7f9f9710c5b1ddcd7facbb98b0ae0bbf" alt="Sensor 16 labelled as temperature does not follow the three temperature sensors; it behaves like traffic" style="width:1000px;height:563px;object-fit:contain;background:#FFFFFF;border-radius:12px">
+<div style="flex:1;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:6px"><h3 style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:40px;font-weight:600">One code, two meanings</h3><p style="font-size:28px;color:#4A5560;line-height:1.35">Code “T” is temperature and traffic. We decided by behaviour: sensor 16 is traffic.</p></div>
+<div style="display:flex;flex-direction:column;gap:6px"><h3 style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:40px;font-weight:600">Two clocks</h3><p style="font-size:28px;color:#4A5560;line-height:1.35">Accidents use hours 1–24, readings 0–23. We shift accidents by one hour.</p></div>
+<div style="display:flex;flex-direction:column;gap:6px"><h3 style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:40px;font-weight:600">28 unexplained cuts</h3><p style="font-size:28px;color:#4A5560;line-height:1.35">Daylight hours set to 60 km/h for no rule. Kept for training, never repeated.</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6B7680">SpeedLimit MVP · 5 · Figures F05, F06, F07 · decisions D1, D2, D10</p>
+<aside>The files load cleanly, but their meaning is ambiguous. The sensor code T stands for both temperature and traffic; the chart shows sensor 16 does not behave like temperature at all, so we treat it as traffic. Accidents and readings use different clocks. And twenty-eight daylight hours were reduced to sixty without any rule. Each of these is written down as a decision.</aside>
+</section>
