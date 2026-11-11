@@ -17,6 +17,12 @@ rules:                             # SPEC1 / SPEC2, D5 (strict inequalities)
   ice_water_um_threshold: 1000
   ice_temp_c_threshold: 0.0
 
+cleaning:                          # data report §8
+  max_interp_gap_h: 3              # C07: longest gap filled by interpolation
+  spike_rel_range: 0.2             # C10: deviation from group median > 20% of sensor range
+  valid_limits: [40, 50, 60, 70, 80]   # C16
+  limit_carry_forward_h: 1         # C16
+
 features:
   lux_epsilon: 0.001               # log10(lux + eps), D11
 

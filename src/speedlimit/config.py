@@ -28,6 +28,14 @@ class RulesConfig:
 
 
 @dataclass(frozen=True)
+class CleaningConfig:
+    max_interp_gap_h: int
+    spike_rel_range: float
+    valid_limits: list[int]
+    limit_carry_forward_h: int
+
+
+@dataclass(frozen=True)
 class FeaturesConfig:
     lux_epsilon: float
 
@@ -100,6 +108,7 @@ class DriftConfig:
 class Config:
     paths: PathsConfig
     rules: RulesConfig
+    cleaning: CleaningConfig
     features: FeaturesConfig
     split: SplitConfig
     model: ModelConfig
@@ -141,6 +150,7 @@ def load_config(path: Path = Path("config.yaml")) -> Config:
 
     sections = {
         "paths": (PathsConfig, p), "rules": (RulesConfig, raw.get("rules", {})),
+        "cleaning": (CleaningConfig, raw.get("cleaning", {})),
         "features": (FeaturesConfig, raw.get("features", {})), "split": (SplitConfig, raw.get("split", {})),
         "model": (ModelConfig, m), "decide": (DecideConfig, raw.get("decide", {})),
         "air_quality": (AQConfig, raw.get("air_quality", {})), "llm": (LLMConfig, raw.get("llm", {})),
