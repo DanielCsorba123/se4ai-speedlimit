@@ -398,7 +398,7 @@ sequenceDiagram
 
 | Setting | Value | Note |
 |---|---|---|
-| Model | `claude-sonnet-5-5` (config `llm.model`) | Latest Sonnet: cheap and fast enough for a small JSON decision. Can be switched to `claude-opus-5-5` in config without code change. |
+| Model | `claude-opus-5-5` (config `llm.model`) | Current default Claude model (changed from Sonnet during implementation, Task 6 ruling). Can be switched to `claude-sonnet-5-5` in config without code change. |
 | Endpoint | `client.messages.create(...)` via the anthropic SDK (D18) | No raw HTTP |
 | Output format | Structured output: `output_config={"format": {"type": "json_schema", "schema": SCHEMA}}` | Guarantees schema-shaped JSON; we still validate (7.4) |
 | Effort | `output_config.effort = "low"` | Simple classification-like task; keeps latency and cost down |
@@ -693,9 +693,9 @@ The decision log is append-only; the app never edits or deletes lines. It contai
 | `air_quality.cache_ttl_min` | `15` | |
 | `air_quality.max_cache_age_h` | `3` | 7.6 |
 | `air_quality.fallback_table` | `[[60, 80], [80, 70], [100, 60], [inf, 50]]` | D15 (upper bound, limit) |
-| `llm.model` | `claude-sonnet-5-5` | 7.1 |
+| `llm.model` | `claude-opus-5-5` | 7.1 |
 | `llm.effort` | `low` | |
-| `llm.max_tokens` | `1024` | |
+| `llm.max_tokens` | `4096` | |
 | `llm.timeout_s` | `10` | |
 | `llm.max_retries` | `1` | |
 | `llm.server_fallback` | `true` | Server-side refusal fallback |

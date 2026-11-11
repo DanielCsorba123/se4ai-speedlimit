@@ -90,6 +90,7 @@ class LLMConfig:
     cache_ttl_min: int
     max_calls_per_day: int
     prompt_version: str
+    server_fallback: bool
     plausibility_margin_kmh: int
 
 
