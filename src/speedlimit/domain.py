@@ -78,3 +78,5 @@ class Decision:
     req2: Req2Result
     explanation: str
     model_version: str | None
+    situation: Situation | None = None       # inputs, for the audit log (arch 11.1)
+    decided_at: datetime | None = None

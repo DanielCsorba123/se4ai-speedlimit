@@ -1,4 +1,4 @@
-"""Decision logic. REQ1 part (backlog Task 5): candidate sweep with monotone guard.
+"""Decision logic: REQ1 candidate sweep with monotone guard (Task 5) and the router / combiner (Task 7).
 
 Selection (D7, D25, D33): among candidates <= req1_max_limit, take the highest
 whose guarded rate is <= target. If none, take the highest within epsilon of
@@ -6,8 +6,14 @@ the lowest guarded rate and flag the target as not reachable.
 """
 from __future__ import annotations
 
+import dataclasses
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+
 from speedlimit.config import Config
-from speedlimit.domain import Req1Result, RuleResult, Situation
+from speedlimit.domain import AQSummary, Decision, Req1Result, Req2Result, RuleResult, Situation
+from speedlimit.llm_advisor import advise, manual_limit
 from speedlimit.features import situation_to_frame
 from speedlimit.model import ModelArtefact, baseline_predict, monotone_guard, predict_rate
 from speedlimit.rules import evaluate
@@ -53,3 +59,54 @@ def req1_limit(s: Situation, art: ModelArtefact | None, cfg: Config, rule: RuleR
     extrapolated = tuple(l for l in limits if cells and cells.get((cond, l), 0) == 0)  # D32
     return Req1Result(active=True, limit=limit, rates_raw=rates_raw, rates_guarded=guarded,
                       target_reachable=reachable, source=source, extrapolated=extrapolated)
+
+
+# --- router + combiner (backlog Task 7, D16) --------------------------------------------
+
+@dataclass
+class RuntimeContext:
+    cfg: Config
+    art: ModelArtefact | None = None
+    baseline: dict | None = None
+    aq_summary: AQSummary | None = None
+    manual_aqi: float | None = None          # D26 step 2 / D31
+    llm_client: object | None = None
+    llm_log: Path | None = None
+
+
+def _explain(final: int, reasons: list[str], rule: RuleResult, r1: Req1Result, r2: Req2Result) -> str:
+    if reasons == ["REQ3"]:
+        return "No reason to reduce: daylight, no black-ice danger, air quality not poor. Limit stays 80 km/h (REQ3)."
+    parts = []
+    if r1.active:
+        cond = " and ".join(c for c, on in (("dark", rule.dark), ("black-ice danger", rule.black_ice)) if on)
+        rate = r1.rates_guarded.get(r1.limit)
+        target = "target <= 1/h reached" if r1.target_reachable else "target <= 1/h NOT reachable"
+        parts.append(f"REQ1 ({cond}): {r1.limit} km/h, predicted {rate:.2f} near-accidents/h, {target}"
+                     if rate is not None else f"REQ1 ({cond}): {r1.limit} km/h")
+    if r2.limit < 80 or r2.source in ("llm", "manual"):
+        parts.append(f"REQ2 (air, {r2.source}): {r2.limit} km/h")
+    return f"Limit {final} km/h set by {' + '.join(reasons)}. " + "; ".join(parts) + "."
+
+
+def combine(rule: RuleResult, r1: Req1Result, r2: Req2Result, model_version: str | None = None,
+            default_limit: int = 80) -> Decision:
+    """D16: the most restrictive reason wins; ties list every determining reason."""
+    candidates = {"REQ1": r1.limit if r1.active else default_limit, "REQ2": r2.limit}
+    final = min([default_limit, *candidates.values()])
+    reasons = [k for k, v in candidates.items() if v == final] if final < default_limit else ["REQ3"]
+    return Decision(limit=final, winning_reasons=reasons, rule=rule, req1=r1, req2=r2,
+                    explanation=_explain(final, reasons, rule, r1, r2), model_version=model_version)
+
+
+def decide(s: Situation, ctx: RuntimeContext) -> Decision:
+    cfg = ctx.cfg
+    rule = evaluate(s, cfg.rules)
+    r1 = req1_limit(s, ctx.art, cfg, rule=rule, baseline=ctx.baseline)
+    if ctx.manual_aqi is not None:
+        r2 = manual_limit(ctx.manual_aqi, cfg)
+    else:
+        r2 = advise(ctx.aq_summary, cfg, client=ctx.llm_client, log_path=ctx.llm_log)
+    d = combine(rule, r1, r2, model_version=ctx.art.version if ctx.art else None,
+                default_limit=cfg.decide.default_limit)
+    return dataclasses.replace(d, situation=s, decided_at=datetime.now())
